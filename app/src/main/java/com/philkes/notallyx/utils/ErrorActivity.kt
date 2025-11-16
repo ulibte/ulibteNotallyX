@@ -104,7 +104,6 @@ class ErrorActivity : AppCompatActivity() {
                         lifecycleScope.launch(exceptionHandler) {
                             val exportedNotes =
                                 withContext(Dispatchers.IO) {
-                                    throw IllegalArgumentException("idiot")
                                     return@withContext application.exportAsZip(
                                         uri,
                                         password = preferences.backupPassword.value,

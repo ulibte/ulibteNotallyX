@@ -5,10 +5,12 @@ import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
+import com.philkes.notallyx.data.NotallyDatabase.Companion.DATABASE_NAME
 import com.philkes.notallyx.data.model.Attachment
 import com.philkes.notallyx.data.model.Audio
 import com.philkes.notallyx.data.model.FileAttachment
@@ -20,7 +22,11 @@ import java.io.File
 import java.io.FileFilter
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.io.OutputStream
 import java.nio.file.Files
+import java.security.MessageDigest
+import java.util.zip.CRC32
+import net.lingala.zip4j.ZipFile
 
 private const val TAG = "IO"
 
@@ -42,7 +48,7 @@ fun Context.getTempAudioFile(): File {
 
 fun InputStream.copyToFile(destination: File) {
     val output = FileOutputStream(destination)
-    copyTo(output)
+    copyToLarge(output)
     close()
     output.close()
     Log.d(TAG, "Copied InputStream to '${destination.absolutePath}'")
@@ -110,6 +116,20 @@ fun File.recreateDir(): File {
     }
     mkdirs()
     return this
+}
+
+private const val BUFFER_SIZE = 512 * 1024
+
+fun File.copyToLarge(
+    target: File,
+    overwrite: Boolean = false,
+    bufferSize: Int = BUFFER_SIZE,
+): File {
+    return copyTo(target = target, overwrite = overwrite, bufferSize = bufferSize)
+}
+
+fun InputStream.copyToLarge(target: OutputStream, bufferSize: Int = BUFFER_SIZE): Long {
+    return copyTo(out = target, bufferSize = bufferSize)
 }
 
 fun ContextWrapper.deleteAttachments(
@@ -209,3 +229,75 @@ fun File.listFilesRecursive(filter: FileFilter? = null): List<File> {
 
 const val MIME_TYPE_ZIP = "application/zip"
 const val MIME_TYPE_JSON = "application/json"
+
+fun ZipFile.verifyCrc(databaseFile: File): Boolean {
+    val dbEntry =
+        fileHeaders.find { it.fileName == DATABASE_NAME }
+            ?: throw RuntimeException("Database file missing in ZIP")
+
+    // Compare CRC
+    val originalCrc =
+        CRC32()
+            .apply {
+                File(databaseFile.path).inputStream().use { fis ->
+                    val buffer = ByteArray(256 * 1024)
+                    var read: Int
+                    while (fis.read(buffer).also { read = it } != -1) update(buffer, 0, read)
+                }
+            }
+            .value
+
+    if (dbEntry.crc != originalCrc) {
+        return false
+    }
+
+    for (fileHeader in fileHeaders) {
+        // Directories have no CRC
+        if (fileHeader.isDirectory) continue
+
+        if (fileHeader == dbEntry) {
+            continue
+        }
+
+        // Get expected CRC from ZIP metadata
+        val expected = fileHeader.crc
+
+        // Compute actual CRC
+        val crc = CRC32()
+        getInputStream(fileHeader).use { input ->
+            val buffer = ByteArray(1024 * 64)
+            var read: Int
+            while (input.read(buffer).also { read = it } != -1) {
+                crc.update(buffer, 0, read)
+            }
+        }
+
+        val actual = crc.value
+
+        if (expected != actual) {
+            return false // CRC mismatch → corrupted
+        }
+    }
+    return true
+}
+
+fun Context.md5Hash(uri: Uri): ByteArray? {
+    return contentResolver.openInputStream(uri)?.md5Hash()
+}
+
+fun File.md5Hash(): ByteArray {
+    return inputStream().md5Hash()
+}
+
+fun InputStream.md5Hash(): ByteArray {
+    val digest = MessageDigest.getInstance("MD5")
+    use { fis ->
+        val buffer = ByteArray(BUFFER_SIZE / 2)
+        var bytes = fis.read(buffer)
+        while (bytes != -1) {
+            digest.update(buffer, 0, bytes)
+            bytes = fis.read(buffer)
+        }
+    }
+    return digest.digest()
+}

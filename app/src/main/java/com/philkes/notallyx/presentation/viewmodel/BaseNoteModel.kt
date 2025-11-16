@@ -74,6 +74,7 @@ import com.philkes.notallyx.utils.backup.getPreviousNotes
 import com.philkes.notallyx.utils.backup.importZip
 import com.philkes.notallyx.utils.backup.readAsBackup
 import com.philkes.notallyx.utils.cancelNoteReminders
+import com.philkes.notallyx.utils.copyToLarge
 import com.philkes.notallyx.utils.deleteAttachments
 import com.philkes.notallyx.utils.getBackupDir
 import com.philkes.notallyx.utils.getExternalImagesDirectory
@@ -266,7 +267,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
                 val targetDirectory = NotallyDatabase.getExternalDatabaseFile(app).parentFile
                 val internalDatabaseFiles = NotallyDatabase.getInternalDatabaseFiles(app)
                 internalDatabaseFiles.forEach {
-                    it.copyTo(File(targetDirectory, it.name), overwrite = true)
+                    it.copyToLarge(File(targetDirectory, it.name), overwrite = true)
                 }
                 val notallyDatabase = NotallyDatabase.getFreshDatabase(app, true)
                 if (!notallyDatabase.ping()) {
@@ -288,7 +289,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
                 val targetDirectory = NotallyDatabase.getInternalDatabaseFile(app).parentFile
                 val externalDatabaseFiles = NotallyDatabase.getExternalDatabaseFiles(app)
                 externalDatabaseFiles.forEach {
-                    it.copyTo(File(targetDirectory, it.name), overwrite = true)
+                    it.copyToLarge(File(targetDirectory, it.name), overwrite = true)
                 }
                 val notallyDatabase = NotallyDatabase.getFreshDatabase(app, false)
                 if (!notallyDatabase.ping()) {
@@ -311,12 +312,12 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
             val (_, dbFileBackup) = app.copyDatabase(suffix = "-encrypt-backup")
             encryptDatabase(app, dbFileCopy, passphrase)
             val originalDbFile = NotallyDatabase.getCurrentDatabaseFile(app)
-            dbFileCopy.copyTo(originalDbFile, overwrite = true)
+            dbFileCopy.copyToLarge(originalDbFile, overwrite = true)
             if (originalDbFile.isUnencryptedDatabase) {
-                dbFileBackup.copyTo(originalDbFile, overwrite = true)
+                dbFileBackup.copyToLarge(originalDbFile, overwrite = true)
                 val externalBackupFile =
                     File(app.getExternalMediaDirectory(), "${DATABASE_NAME}_Backup-encrypt")
-                dbFileBackup.copyTo(externalBackupFile, overwrite = true)
+                dbFileBackup.copyToLarge(externalBackupFile, overwrite = true)
                 throw EncryptionException(
                     "Encrypt succeeded but overwritten database is not encrypted"
                 )
@@ -338,12 +339,12 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
             val (_, dbFileBackup) = app.copyDatabase(decrypt = false, suffix = "-decrypt-backup")
             decryptDatabase(app, dbFileCopy, passphrase)
             val originalDbFile = NotallyDatabase.getCurrentDatabaseFile(app)
-            dbFileCopy.copyTo(originalDbFile, overwrite = true)
+            dbFileCopy.copyToLarge(originalDbFile, overwrite = true)
             if (originalDbFile.isEncryptedDatabase) {
-                dbFileBackup.copyTo(originalDbFile, overwrite = true)
+                dbFileBackup.copyToLarge(originalDbFile, overwrite = true)
                 val externalBackupFile =
                     File(app.getExternalMediaDirectory(), "${DATABASE_NAME}_Backup-decrypt")
-                dbFileBackup.copyTo(externalBackupFile, overwrite = true)
+                dbFileBackup.copyToLarge(externalBackupFile, overwrite = true)
                 throw DecryptionException(
                     "Decrypt succeeded but overwritten database is still encrypted"
                 )
