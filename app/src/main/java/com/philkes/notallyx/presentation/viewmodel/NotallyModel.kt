@@ -50,9 +50,9 @@ import com.philkes.notallyx.utils.backup.importFile
 import com.philkes.notallyx.utils.cancelNoteReminders
 import com.philkes.notallyx.utils.cancelReminder
 import com.philkes.notallyx.utils.deleteAttachments
-import com.philkes.notallyx.utils.getExternalAudioDirectory
-import com.philkes.notallyx.utils.getExternalFilesDirectory
-import com.philkes.notallyx.utils.getExternalImagesDirectory
+import com.philkes.notallyx.utils.getCurrentAudioDirectory
+import com.philkes.notallyx.utils.getCurrentFilesDirectory
+import com.philkes.notallyx.utils.getCurrentImagesDirectory
 import com.philkes.notallyx.utils.getTempAudioFile
 import com.philkes.notallyx.utils.scheduleReminder
 import java.io.File
@@ -99,9 +99,9 @@ class NotallyModel(private val app: Application) : AndroidViewModel(app) {
     val addingFiles = MutableLiveData<Progress>()
     val eventBus = MutableLiveData<Event<List<FileError>>>()
 
-    var imageRoot = app.getExternalImagesDirectory()
-    var audioRoot = app.getExternalAudioDirectory()
-    var filesRoot = app.getExternalFilesDirectory()
+    var imageRoot = app.getCurrentImagesDirectory()
+    var audioRoot = app.getCurrentAudioDirectory()
+    var filesRoot = app.getCurrentFilesDirectory()
 
     var originalNote: BaseNote? = null
 
@@ -134,7 +134,7 @@ class NotallyModel(private val app: Application) : AndroidViewModel(app) {
         Regenerate because the directory may have been deleted between the time of activity creation
         and image addition
          */
-        imageRoot = app.getExternalImagesDirectory()
+        imageRoot = app.getCurrentImagesDirectory()
         requireNotNull(imageRoot) { "imageRoot is null" }
         addFiles(uris, imageRoot!!, FileType.IMAGE)
     }
@@ -144,7 +144,7 @@ class NotallyModel(private val app: Application) : AndroidViewModel(app) {
         Regenerate because the directory may have been deleted between the time of activity creation
         and image addition
          */
-        filesRoot = app.getExternalFilesDirectory()
+        filesRoot = app.getCurrentFilesDirectory()
         requireNotNull(filesRoot) { "filesRoot is null" }
         addFiles(uris, filesRoot!!, FileType.ANY)
     }

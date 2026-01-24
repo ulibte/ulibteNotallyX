@@ -27,6 +27,7 @@
     <string name="auto_backup_last">Last Backup</string>
     <string name="auto_backup_on_save">Backup on exit Note automatically</string>
     <string name="auto_backup_on_save_hint">By enabling this, a backup (\"NotallyX_AutoBackup.zip\") is automatically created in the configured \"Backups Folder\" whenever a note is exited.\nBe aware this might affect performance</string>
+    <string name="auto_backup_skipped_files">Skipped %1$d missing attached files/images</string>
     <string name="auto_backups_folder">Backups Folder</string>
     <string name="auto_backups_folder_hint">Folder in which all auto backups will be stored in.\nIf you want to use Cloud-Storage/WebDAV for your backups, please read the docs (click \"%1$s\")</string>
     <string name="auto_backups_folder_rechoose">You need to re-choose your Backups Folder so that NotallyX has permission to write to it.\nYou can also press cancel to skip importing Backups Folder value</string>
@@ -74,6 +75,9 @@
     <string name="choose_another_folder">Choose another folder</string>
     <string name="choose_folder">Choose folder</string>
     <string name="choose_other_app">Choose which app to import from</string>
+    <string name="clean_up">Clean Up</string>
+    <string name="cleanup_finished_summary">Removed %1$d missing attachments from %2$d notes</string>
+    <string name="cleanup_finished_title">Cleanup Finished</string>
     <string name="clear">Clear</string>
     <string name="clear_data">Clear Data</string>
     <string name="clear_data_message">All Notes, Images, Files, Audios will be permanently deleted</string>
@@ -97,7 +101,7 @@
     <string name="daily">Daily</string>
     <string name="dark">Dark</string>
     <string name="data_in_public">Store data in public folder</string>
-    <string name="data_in_public_message">By enabling this, the app’s internal database will be moved into the app’s public folder (Android/media/com.philkes.notallyx).\nIn combination with file synchronization apps this can be used to synchronize NotallyX data between multiple devices.</string>
+    <string name="data_in_public_message">By enabling this, the app’s internal database and attached files will be moved into the app’s public folder (Android/media/com.philkes.notallyx). In combination with file synchronization apps this can be used to synchronize NotallyX data between multiple devices.</string>
     <string name="date">Date</string>
     <string name="date_format">Date format</string>
     <string name="date_format_apply_in_note_view">Also apply in Note View</string>
