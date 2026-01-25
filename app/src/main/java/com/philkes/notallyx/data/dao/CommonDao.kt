@@ -1,15 +1,20 @@
 package com.philkes.notallyx.data.dao
 
+import android.content.ContextWrapper
 import androidx.room.Dao
 import androidx.room.Transaction
 import com.philkes.notallyx.data.NotallyDatabase
+import com.philkes.notallyx.data.dao.BaseNoteDao.Companion.MAX_BODY_CHAR_LENGTH
 import com.philkes.notallyx.data.model.BaseNote
 import com.philkes.notallyx.data.model.Label
 import com.philkes.notallyx.data.model.LabelsInBaseNote
+import com.philkes.notallyx.data.model.SpanRepresentation
+import com.philkes.notallyx.data.model.Type
 import com.philkes.notallyx.data.model.createNoteUrl
 import com.philkes.notallyx.data.model.getNoteIdFromUrl
 import com.philkes.notallyx.data.model.getNoteTypeFromUrl
 import com.philkes.notallyx.data.model.isNoteUrl
+import com.philkes.notallyx.utils.NoteSplitUtils
 
 @Dao
 abstract class CommonDao(private val database: NotallyDatabase) {
@@ -40,8 +45,20 @@ abstract class CommonDao(private val database: NotallyDatabase) {
     }
 
     @Transaction
-    open suspend fun importBackup(baseNotes: List<BaseNote>, labels: List<Label>) {
-        database.getBaseNoteDao().insert(baseNotes)
+    open suspend fun importBackup(
+        context: ContextWrapper,
+        baseNotes: List<BaseNote>,
+        labels: List<Label>,
+    ) {
+        val dao = database.getBaseNoteDao()
+        // Insert notes, splitting oversized text notes instead of truncating
+        baseNotes.forEach { note ->
+            if (note.type == Type.NOTE && note.body.length > MAX_BODY_CHAR_LENGTH) {
+                NoteSplitUtils.splitAndInsertForImport(note, dao)
+            } else {
+                dao.insert(note.copy(id = 0))
+            }
+        }
         database.getLabelDao().insert(labels)
     }
 
@@ -57,21 +74,31 @@ abstract class CommonDao(private val database: NotallyDatabase) {
         labels: List<Label>,
     ) {
         val baseNoteDao = database.getBaseNoteDao()
-        val newIds = baseNoteDao.insert(baseNotes)
-        // Build old->new mapping using positional correspondence
+
+        // 1) Insert notes with splitting; build mapping from original id -> first-part new id
         val idMap = HashMap<Long, Long>(originalIds.size)
-        val count = minOf(originalIds.size, newIds.size)
-        for (i in 0 until count) {
-            idMap[originalIds[i]] = newIds[i]
+        // Keep all inserted note ids with their spans for remapping pass
+        val insertedParts = ArrayList<Pair<Long, List<SpanRepresentation>>>()
+
+        for (i in baseNotes.indices) {
+            val original = baseNotes[i]
+            val (firstId, parts) =
+                if (original.type == Type.NOTE && original.body.length > MAX_BODY_CHAR_LENGTH) {
+                    NoteSplitUtils.splitAndInsertForImport(original, baseNoteDao)
+                } else {
+                    val newId = baseNoteDao.insert(original.copy(id = 0))
+                    Pair(newId, listOf(Pair(newId, original.spans)))
+                }
+            val oldId = originalIds.getOrNull(i)
+            if (oldId != null) idMap[oldId] = firstId
+            insertedParts.addAll(parts)
         }
 
-        // Remap note links in spans where necessary
-        for (i in baseNotes.indices) {
-            val note = baseNotes[i]
-            val newId = newIds.getOrNull(i) ?: continue
+        // 2) Remap note links in spans for all inserted notes
+        for ((noteId, spans) in insertedParts) {
             var changed = false
-            val updatedSpans =
-                note.spans.map { span ->
+            val updated =
+                spans.map { span ->
                     if (span.link && span.linkData?.isNoteUrl() == true) {
                         val url = span.linkData!!
                         val oldTargetId = url.getNoteIdFromUrl()
@@ -80,13 +107,11 @@ abstract class CommonDao(private val database: NotallyDatabase) {
                         if (newTargetId != null) {
                             changed = true
                             span.copy(linkData = newTargetId.createNoteUrl(type))
-                        } else {
-                            span
-                        }
+                        } else span
                     } else span
                 }
             if (changed) {
-                baseNoteDao.updateSpans(newId, updatedSpans)
+                baseNoteDao.updateSpans(noteId, updated)
             }
         }
 

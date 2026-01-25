@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.SharedPreferences
 import android.database.Cursor
+import android.database.sqlite.SQLiteBlobTooBigException
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
@@ -130,7 +131,7 @@ suspend fun ContextWrapper.importZip(
                 val originalIds = ArrayList<Long>(baseNoteCursor.count)
                 val baseNotes =
                     baseNoteCursor.toList { cursor ->
-                        val baseNote = cursor.toBaseNote()
+                        val baseNote = cursor.toBaseNote(database)
                         val originalId = cursor.getLong(cursor.getColumnIndexOrThrow("id"))
                         originalIds.add(originalId)
                         importingBackup?.postValue(ImportProgress(counter++, total))
@@ -249,7 +250,7 @@ private fun Cursor.toLabel(): Label {
     return Label(value)
 }
 
-private fun Cursor.toBaseNote(): BaseNote {
+private fun Cursor.toBaseNote(sourceDb: SQLiteDatabase): BaseNote {
     val typeTmp = getString(getColumnIndexOrThrow("type"))
     val folderTmp = getString(getColumnIndexOrThrow("folder"))
     val color =
@@ -265,7 +266,25 @@ private fun Cursor.toBaseNote(): BaseNote {
             getLongOrNull(modifiedTimestampIndex) ?: timestamp
         }
     val labelsTmp = getString(getColumnIndexOrThrow("labels"))
-    val body = getString(getColumnIndexOrThrow("body"))
+    val id = getLong(getColumnIndexOrThrow("id"))
+    val body =
+        try {
+            getString(getColumnIndexOrThrow("body"))
+        } catch (_: SQLiteBlobTooBigException) {
+            // Fall back to truncated read from source DB to avoid cursor window overflow
+            val cursor =
+                sourceDb.rawQuery(
+                    "SELECT substr(body, 1, ?) AS body FROM BaseNote WHERE id = ?",
+                    arrayOf(
+                        com.philkes.notallyx.data.dao.BaseNoteDao.Companion.MAX_BODY_CHAR_LENGTH
+                            .toString(),
+                        id.toString(),
+                    ),
+                )
+            val value = if (cursor.moveToFirst()) cursor.getString(0) else ""
+            cursor.close()
+            value
+        }
     val spansTmp = getString(getColumnIndexOrThrow("spans"))
     val itemsTmp = getString(getColumnIndexOrThrow("items"))
 

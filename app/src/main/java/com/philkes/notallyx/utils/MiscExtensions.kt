@@ -44,6 +44,33 @@ fun CharSequence?.findWebUrls(): Collection<Pair<Int, Int>> {
     } ?: listOf()
 }
 
+fun String.truncateToMb(mb: Double): String {
+    val maxBytes = (mb * 1024 * 1024).toInt()
+    val bytes = this.toByteArray(Charsets.UTF_8)
+
+    if (bytes.size <= maxBytes) return this
+
+    // Take only the allowed bytes
+    val truncatedBytes = bytes.sliceArray(0 until maxBytes)
+
+    // Converting back to String handles partial UTF-8 characters
+    // by using the default replacement behavior.
+    return String(truncatedBytes, Charsets.UTF_8)
+}
+
+/**
+ * Calculates the character limit for a given MB size.
+ * * @param mb The size limit in Megabytes (e.g., 1.5)
+ *
+ * @return A Pair where: first = Minimum characters guaranteed (worst-case: 4 bytes/char) second =
+ *   Maximum characters possible (best-case: 1 byte/char)
+ */
+fun Double.charLimit(): Int {
+    val totalBytes = (this * 1024 * 1024).toInt()
+    val minChars = totalBytes / 4 // Every character is an Emoji/Complex
+    return minChars
+}
+
 fun String.findAllOccurrences(
     search: String,
     caseSensitive: Boolean = false,
