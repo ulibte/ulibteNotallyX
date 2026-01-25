@@ -299,7 +299,7 @@ private fun Cursor.toBaseNote(sourceDb: SQLiteDatabase): BaseNote {
     val folder = Folder.valueOfOrDefault(folderTmp)
 
     val labels = Converters.jsonToLabels(labelsTmp)
-    val spans = Converters.jsonToSpans(spansTmp)
+    val spans = Converters.jsonToSpans(spansTmp).filter { it.isInsideBounds() }
     val items = Converters.jsonToItems(itemsTmp)
 
     val imagesIndex = getColumnIndex("images")

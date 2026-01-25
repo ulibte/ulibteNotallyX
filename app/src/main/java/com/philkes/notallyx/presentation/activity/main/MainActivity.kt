@@ -141,7 +141,6 @@ class MainActivity : LockedActivity<ActivityMainBinding>() {
                 navigateToStartView()
             }
         }
-        preferences.setDataSchemaId(1)
         if (preferences.dataSchemaId.value < LATEST_DATA_SCHEMA) {
             val migrationProgress = MutableLiveData<MigrationProgress>()
             migrationProgress.setupProgressDialog(this)

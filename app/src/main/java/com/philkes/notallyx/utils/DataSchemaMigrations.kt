@@ -35,7 +35,7 @@ suspend fun Application.runMigrations(onProgressTitle: (Int) -> Unit = {}): Bool
         }
         if (newDataSchemaId < 2) {
             onProgressTitle(com.philkes.notallyx.R.string.migration_splitting_notes)
-            splitOversizedNotes(preferences)
+            splitOversizedNotes()
             newDataSchemaId = 2
             didWork = true
         }
@@ -61,8 +61,11 @@ private fun Application.moveAttachments(preferences: NotallyXPreferences) {
  * end of each truncated note that points to the next note. The link text is included in the body
  * and must also fit within the size limit.
  */
-private suspend fun Application.splitOversizedNotes(preferences: NotallyXPreferences) {
-    log(TAG, "Running migration 2: Splitting notes exceeding the body size limit")
+private suspend fun Application.splitOversizedNotes() {
+    log(
+        TAG,
+        "Running migration 2: Splitting notes exceeding the body size limit (limit: $MAX_BODY_CHAR_LENGTH characters)",
+    )
 
     // Obtain a direct DB instance matching current storage location
     val db = NotallyDatabase.getDatabase(this as ContextWrapper, false).value
@@ -78,6 +81,11 @@ private suspend fun Application.splitOversizedNotes(preferences: NotallyXPrefere
                 dao.get(id)
             } catch (e: SQLiteBlobTooBigException) {
                 // Repair the single offending row, then retry
+                log(
+                    TAG,
+                    "Note (id: $id) threw SQLiteBlobTooBigException since body is too large to load. Repairing...",
+                    e,
+                )
                 repaired += 1
                 truncateBodyAndFixSpans(dao, id)
                 dao.get(id)
@@ -91,7 +99,7 @@ private suspend fun Application.splitOversizedNotes(preferences: NotallyXPrefere
         val created = splitOversizedExistingNoteForMigration(original, dao)
         log(
             TAG,
-            "Note (id: ${original.id}, title: '${original.title}') split into ${created+1} notes",
+            "Note (id: ${original.id}, title: '${original.title}') split into ${created+1} notes (was: $bodyLen characters).",
         )
     }
 

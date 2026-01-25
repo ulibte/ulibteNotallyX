@@ -1,6 +1,5 @@
 package com.philkes.notallyx.data.dao
 
-import android.content.ContextWrapper
 import androidx.room.Dao
 import androidx.room.Transaction
 import com.philkes.notallyx.data.NotallyDatabase
@@ -45,11 +44,7 @@ abstract class CommonDao(private val database: NotallyDatabase) {
     }
 
     @Transaction
-    open suspend fun importBackup(
-        context: ContextWrapper,
-        baseNotes: List<BaseNote>,
-        labels: List<Label>,
-    ) {
+    open suspend fun importBackup(baseNotes: List<BaseNote>, labels: List<Label>) {
         val dao = database.getBaseNoteDao()
         // Insert notes, splitting oversized text notes instead of truncating
         baseNotes.forEach { note ->

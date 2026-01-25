@@ -422,7 +422,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
                             { "InputStream for '$uri' is null" },
                         )
                     val (baseNotes, labels) = stream.readAsBackup()
-                    commonDao.importBackup(app, baseNotes, labels)
+                    commonDao.importBackup(baseNotes, labels)
                     baseNotes.size
                 }
             val message = app.getQuantityString(R.plurals.imported_notes, importedNotes)
