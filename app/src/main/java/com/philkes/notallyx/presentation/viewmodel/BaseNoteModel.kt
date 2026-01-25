@@ -201,7 +201,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
             if (previousNotes.isNotEmpty() || previousLabels.isNotEmpty()) {
                 database.withTransaction {
                     labelDao.insert(previousLabels)
-                    baseNoteDao.insert(previousNotes)
+                    baseNoteDao.insertSafe(app, previousNotes)
                     app.clearAllLabels()
                     app.clearAllFolders()
                 }
@@ -422,7 +422,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
                             { "InputStream for '$uri' is null" },
                         )
                     val (baseNotes, labels) = stream.readAsBackup()
-                    commonDao.importBackup(baseNotes, labels)
+                    commonDao.importBackup(app, baseNotes, labels)
                     baseNotes.size
                 }
             val message = app.getQuantityString(R.plurals.imported_notes, importedNotes)

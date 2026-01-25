@@ -1,5 +1,6 @@
 package com.philkes.notallyx.presentation.viewmodel
 
+import android.R.attr.type
 import android.app.Application
 import android.graphics.Typeface
 import android.net.Uri
@@ -264,7 +265,7 @@ class NotallyModel(private val app: Application) : AndroidViewModel(app) {
     private suspend fun createBaseNote(createInDb: Boolean = true): BaseNote {
         val baseNote = getBaseNote()
         if (createInDb) {
-            id = withContext(Dispatchers.IO) { baseNoteDao.insert(baseNote) }
+            id = withContext(Dispatchers.IO) { baseNoteDao.insertSafe(app, baseNote) }
         }
         return baseNote.copy(id = id)
     }
@@ -290,7 +291,7 @@ class NotallyModel(private val app: Application) : AndroidViewModel(app) {
     suspend fun saveNote(checkBackupOnSave: Boolean = true): Long {
         return withContext(Dispatchers.IO) {
             val note = getBaseNote()
-            val id = baseNoteDao.insert(note)
+            val id = baseNoteDao.insertSafe(app, note)
             if (checkBackupOnSave) {
                 checkBackupOnSave(note)
             }

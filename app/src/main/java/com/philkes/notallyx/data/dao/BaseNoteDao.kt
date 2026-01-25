@@ -1,5 +1,6 @@
 package com.philkes.notallyx.data.dao
 
+import android.content.ContextWrapper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.room.Dao
@@ -9,6 +10,7 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.philkes.notallyx.R
 import com.philkes.notallyx.data.model.Audio
 import com.philkes.notallyx.data.model.BaseNote
 import com.philkes.notallyx.data.model.FileAttachment
@@ -17,6 +19,10 @@ import com.philkes.notallyx.data.model.LabelsInBaseNote
 import com.philkes.notallyx.data.model.ListItem
 import com.philkes.notallyx.data.model.Reminder
 import com.philkes.notallyx.data.model.Type
+import com.philkes.notallyx.presentation.showToast
+import com.philkes.notallyx.utils.charLimit
+import com.philkes.notallyx.utils.log
+import kotlin.text.compareTo
 
 data class NoteIdReminder(val id: Long, val reminders: List<Reminder>)
 
@@ -27,12 +33,66 @@ data class NoteReminder(
     val reminders: List<Reminder>,
 )
 
+/** Maximum allowed size of a note body in MB (~340,000 characters) */
+const val MAX_BODY_SIZE_MB = 1.5
+
 @Dao
 interface BaseNoteDao {
 
     @RawQuery fun query(query: SupportSQLiteQuery): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(baseNote: BaseNote): Long
+
+    private fun BaseNote.truncated(): Pair<Boolean, BaseNote> {
+        val charLimit = MAX_BODY_SIZE_MB.charLimit()
+        return if (body.length > charLimit) {
+            return Pair(true, copy(body = body.take(charLimit)))
+        } else Pair(false, this)
+    }
+
+    suspend fun insertSafe(context: ContextWrapper, baseNote: BaseNote): Long {
+        val (truncated, note) = baseNote.truncated()
+        if (truncated) {
+            context.log(
+                TAG,
+                "Note (id: ${note.id}, title: '${note.title}') is too big to insert. Truncating to ${note.body.length} characters (was: ${baseNote.body.length})",
+            )
+            context.showToast(
+                context.getString(
+                    R.string.note_too_big_truncating,
+                    note.body.length,
+                    baseNote.body.length,
+                )
+            )
+        }
+        return insert(note)
+    }
+
+    suspend fun insertSafe(context: ContextWrapper, baseNotes: List<BaseNote>): List<Long> {
+        val truncatedNotes = mutableListOf<BaseNote>()
+        var truncatedCharacterSize = 0
+        val notes =
+            baseNotes.map { baseNote ->
+                val (truncated, note) = baseNote.truncated()
+                if (truncated) {
+                    truncatedCharacterSize += baseNote.body.length
+                    truncatedNotes.add(note)
+                }
+                note
+            }
+        context.log(
+            TAG,
+            "${truncatedNotes.size} Notes are too big to save, they were truncated to $truncatedCharacterSize characters",
+        )
+        context.showToast(
+            context.getString(
+                R.string.notes_too_big_truncating,
+                truncatedNotes.size,
+                truncatedCharacterSize,
+            )
+        )
+        return insert(notes)
+    }
 
     @Insert suspend fun insert(baseNotes: List<BaseNote>): List<Long>
 
@@ -247,5 +307,9 @@ interface BaseNoteDao {
             }
         }
         return false
+    }
+
+    companion object {
+        private const val TAG = "BaseNoteDao"
     }
 }

@@ -61,7 +61,7 @@ class NotesImporter(private val app: Application, private val database: NotallyD
                 importFiles(images, it, NotallyModel.FileType.IMAGE, progress, totalFiles, counter)
                 importAudios(audios, it, progress, totalFiles, counter)
             }
-            database.getBaseNoteDao().insert(notes)
+            database.getBaseNoteDao().insertSafe(app, notes)
             progress?.postValue(ImportProgress(inProgress = false))
             return notes.size
         } finally {
