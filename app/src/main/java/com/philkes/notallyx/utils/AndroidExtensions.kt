@@ -32,7 +32,7 @@ import androidx.lifecycle.Observer
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.philkes.notallyx.BuildConfig
 import com.philkes.notallyx.R
-import com.philkes.notallyx.data.dao.MAX_BODY_SIZE_MB
+import com.philkes.notallyx.data.dao.BaseNoteDao.Companion.MAX_BODY_CHAR_LENGTH
 import com.philkes.notallyx.data.model.BaseNote
 import com.philkes.notallyx.data.model.Type
 import com.philkes.notallyx.data.model.toText
@@ -399,8 +399,7 @@ fun ContextWrapper.shareNote(note: BaseNote) {
     shareNote(note.title, body, filesUris)
 }
 
-fun Context.textMaxLengthFilter() =
-    arrayOf(LengthFilterWithToast(this, MAX_BODY_SIZE_MB.charLimit()))
+fun Context.textMaxLengthFilter() = arrayOf(LengthFilterWithToast(this, MAX_BODY_CHAR_LENGTH))
 
 private fun Context.shareNote(title: String, body: CharSequence, imageUris: List<Uri>) {
     val text = body.truncate(150_000)

@@ -41,7 +41,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.philkes.notallyx.R
 import com.philkes.notallyx.data.NotallyDatabase
-import com.philkes.notallyx.data.dao.MAX_BODY_SIZE_MB
 import com.philkes.notallyx.data.model.Audio
 import com.philkes.notallyx.data.model.FileAttachment
 import com.philkes.notallyx.data.model.Folder
@@ -92,7 +91,6 @@ import com.philkes.notallyx.utils.FileError
 import com.philkes.notallyx.utils.backup.exportNote
 import com.philkes.notallyx.utils.changeStatusAndNavigationBarColor
 import com.philkes.notallyx.utils.changehistory.ChangeHistory
-import com.philkes.notallyx.utils.charLimit
 import com.philkes.notallyx.utils.getFileName
 import com.philkes.notallyx.utils.getMimeType
 import com.philkes.notallyx.utils.getUriForFile
@@ -738,7 +736,6 @@ abstract class EditActivity(private val type: Type) :
             }
             value?.let { toggleCanEdit(it) }
         }
-        Log.d(TAG, "setupListeners: maxtextsize: ${MAX_BODY_SIZE_MB.charLimit()}")
         val textMaxLengthFilter = application.textMaxLengthFilter()
         binding.EnterTitle.filters = textMaxLengthFilter
         binding.EnterBody.filters = textMaxLengthFilter

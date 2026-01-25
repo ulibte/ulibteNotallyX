@@ -34,7 +34,7 @@ data class NoteReminder(
 )
 
 /** Maximum allowed size of a note body in MB (~340,000 characters) */
-const val MAX_BODY_SIZE_MB = 1.5
+const val MAX_BODY_SIZE_MB = 0.001
 
 @Dao
 interface BaseNoteDao {
@@ -44,9 +44,8 @@ interface BaseNoteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(baseNote: BaseNote): Long
 
     private fun BaseNote.truncated(): Pair<Boolean, BaseNote> {
-        val charLimit = MAX_BODY_SIZE_MB.charLimit()
-        return if (body.length > charLimit) {
-            return Pair(true, copy(body = body.take(charLimit)))
+        return if (body.length > MAX_BODY_CHAR_LENGTH) {
+            return Pair(true, copy(body = body.take(MAX_BODY_CHAR_LENGTH)))
         } else Pair(false, this)
     }
 
@@ -311,5 +310,7 @@ interface BaseNoteDao {
 
     companion object {
         private const val TAG = "BaseNoteDao"
+
+        val MAX_BODY_CHAR_LENGTH = MAX_BODY_SIZE_MB.charLimit()
     }
 }
