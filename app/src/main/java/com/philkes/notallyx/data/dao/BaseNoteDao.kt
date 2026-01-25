@@ -34,7 +34,7 @@ data class NoteReminder(
 )
 
 /** Maximum allowed size of a note body in MB (~340,000 characters) */
-const val MAX_BODY_SIZE_MB = 0.001
+const val MAX_BODY_SIZE_MB = 1.5
 
 @Dao
 interface BaseNoteDao {
@@ -193,6 +193,10 @@ interface BaseNoteDao {
         id: Long,
         spans: List<com.philkes.notallyx.data.model.SpanRepresentation>,
     )
+
+    // Truncate body at DB level without loading the row, to resolve oversized rows safely
+    @Query("UPDATE BaseNote SET body = substr(body, 1, :limit) WHERE id = :id")
+    suspend fun truncateBody(id: Long, limit: Int)
 
     /**
      * Both id and position can be invalid.

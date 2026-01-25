@@ -30,7 +30,6 @@ import com.philkes.notallyx.utils.backup.isEqualTo
 import com.philkes.notallyx.utils.backup.modifiedNoteBackupExists
 import com.philkes.notallyx.utils.backup.scheduleAutoBackup
 import com.philkes.notallyx.utils.backup.updateAutoBackup
-import com.philkes.notallyx.utils.checkForMigrations
 import com.philkes.notallyx.utils.observeOnce
 import com.philkes.notallyx.utils.security.UnlockReceiver
 import java.util.concurrent.TimeUnit
@@ -53,7 +52,6 @@ class NotallyXApplication : Application(), Application.ActivityLifecycleCallback
         registerActivityLifecycleCallbacks(this)
         if (isTestRunner()) return
         preferences = NotallyXPreferences.getInstance(this)
-        checkForMigrations()
         if (preferences.useDynamicColors.value) {
             if (DynamicColors.isDynamicColorAvailable()) {
                 DynamicColors.applyToActivitiesIfAvailable(this)

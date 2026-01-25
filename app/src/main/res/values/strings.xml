@@ -54,6 +54,9 @@
     <string name="biometrics_setup_success">Biometric/PIN lock has been enabled</string>
     <string name="bold">Bold</string>
     <string name="calculating">Calculating…</string>
+    <string name="migrating_data">Migrating data…</string>
+    <string name="migration_moving_attachments">Moving attachments…</string>
+    <string name="migration_splitting_notes">Splitting oversized notes…</string>
     <string name="cancel">Cancel</string>
     <plurals name="cant_add_files">
         <item quantity="one">Can’t add %1$d file</item>
