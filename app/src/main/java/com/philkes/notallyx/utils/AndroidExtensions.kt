@@ -393,7 +393,7 @@ fun ContextWrapper.shareNote(note: BaseNote) {
         }
     val filesUris =
         note.images
-            .map { File(getExternalImagesDirectory(), it.localName) }
+            .map { File(getCurrentImagesDirectory(), it.localName) }
             .map { getUriForFile(it) }
     shareNote(note.title, body, filesUris)
 }

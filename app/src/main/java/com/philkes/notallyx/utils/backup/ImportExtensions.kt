@@ -37,9 +37,9 @@ import com.philkes.notallyx.utils.cancelNoteReminders
 import com.philkes.notallyx.utils.clearDirectory
 import com.philkes.notallyx.utils.copyToFile
 import com.philkes.notallyx.utils.determineMimeTypeAndExtension
-import com.philkes.notallyx.utils.getExternalAudioDirectory
-import com.philkes.notallyx.utils.getExternalFilesDirectory
-import com.philkes.notallyx.utils.getExternalImagesDirectory
+import com.philkes.notallyx.utils.getCurrentAudioDirectory
+import com.philkes.notallyx.utils.getCurrentFilesDirectory
+import com.philkes.notallyx.utils.getCurrentImagesDirectory
 import com.philkes.notallyx.utils.getFileName
 import com.philkes.notallyx.utils.log
 import com.philkes.notallyx.utils.mimeTypeToFileExtension
@@ -145,9 +145,9 @@ suspend fun ContextWrapper.importZip(
                 )
 
                 val current = AtomicInteger(1)
-                val imageRoot = getExternalImagesDirectory()
-                val fileRoot = getExternalFilesDirectory()
-                val audioRoot = getExternalAudioDirectory()
+                val imageRoot = getCurrentImagesDirectory()
+                val fileRoot = getCurrentFilesDirectory()
+                val audioRoot = getCurrentAudioDirectory()
                 baseNotes.forEach { baseNote ->
                     importFiles(
                         baseNote.images,
@@ -478,7 +478,7 @@ suspend fun ContextWrapper.importFile(
     uri: Uri,
     proposedMimeType: String? = null,
 ): Pair<FileAttachment?, FileError?> {
-    val filesRoot = getExternalFilesDirectory()
+    val filesRoot = getCurrentFilesDirectory()
     requireNotNull(filesRoot) { "filesRoot is null" }
     return importFile(uri, filesRoot, FileType.ANY, proposedMimeType = proposedMimeType)
 }
@@ -487,7 +487,7 @@ suspend fun ContextWrapper.importImage(
     uri: Uri,
     proposedMimeType: String? = null,
 ): Pair<FileAttachment?, FileError?> {
-    val imagesRoot = getExternalImagesDirectory()
+    val imagesRoot = getCurrentImagesDirectory()
     requireNotNull(imagesRoot) { "imagesRoot is null" }
     return importFile(uri, imagesRoot, FileType.IMAGE, proposedMimeType = proposedMimeType)
 }
@@ -498,7 +498,7 @@ suspend fun ContextWrapper.importAudio(original: File, deleteOriginalFile: Boole
         Regenerate because the directory may have been deleted between the time of activity creation
         and audio recording
         */
-        val audioRoot = getExternalAudioDirectory()
+        val audioRoot = getCurrentAudioDirectory()
         requireNotNull(audioRoot) { "audioRoot is null" }
 
         /*
