@@ -139,6 +139,11 @@
     <string name="documentation">Documentation</string>
     <string name="donate">Make a Donation</string>
     <string name="drag_handle">Drag Handle</string>
+    <string name="duplicate">Duplicate</string>
+    <plurals name="duplicated_notes">
+        <item quantity="one">Duplicated %1$d note</item>
+        <item quantity="other">Duplicated %1$d notes</item>
+    </plurals>
     <string name="edit">Edit</string>
     <string name="edit_color">Edit Color</string>
     <string name="edit_label">Edit label</string>
