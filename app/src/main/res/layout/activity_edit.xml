@@ -135,6 +135,16 @@
                     android:layout_height="wrap_content"
                     />
 
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/LabelGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="24dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="24dp"
+                    android:paddingBottom="8dp"
+                    android:alpha="@fraction/alpha_secondary" />
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
