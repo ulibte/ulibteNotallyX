@@ -154,4 +154,8 @@ open class PickNoteActivity : LockedActivity<ActivityPickNoteBinding>(), ItemLis
         const val EXTRA_PICKED_NOTE_TITLE = "notallyx.intent.extra.PICKED_NOTE_TITLE"
         const val EXTRA_PICKED_NOTE_TYPE = "notallyx.intent.extra.PICKED_NOTE_TYPE"
     }
+
+    override fun onReminderClick(position: Int) {
+        onClick(position)
+    }
 }

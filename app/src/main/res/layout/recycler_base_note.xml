@@ -73,39 +73,35 @@
             android:clickable="false"
             app:layout_constraintTop_toBottomOf="@id/Message" />
 
-        <LinearLayout
-          android:id="@+id/TitleLayout"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:orientation="horizontal"
-          android:paddingStart="16dp"
-          android:paddingEnd="16dp"
-          app:layout_constraintTop_toBottomOf="@id/Space">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ReminderChip"
+                style="@style/Widget.MaterialComponents.Chip.Action"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="10dp"
+                android:paddingVertical="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                app:textStartPadding="4dp"
+                app:chipIcon="@drawable/notifications"
+                app:chipIconSize="20dp"
+                app:chipBackgroundColor="?attr/colorSurfaceVariant"
+                app:layout_constraintTop_toBottomOf="@id/Space"
+                app:layout_constraintStart_toStartOf="parent" />
 
-            <com.philkes.notallyx.presentation.view.misc.highlightableview.HighlightableTextView
-              android:id="@+id/Title"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:fontFamily="sans-serif-medium"
-              android:textAppearance="?attr/textAppearanceBodyLarge"
-              android:textColor="?attr/colorOnSurface"
-              android:ellipsize="end"
-              android:textIsSelectable="false"
-              android:layout_weight="9"/>
-
-            <ImageView
-              android:id="@+id/RemindersView"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:clickable="false"
-              android:contentDescription="@string/reminders"
-              android:stateListAnimator="@null"
-              android:textAppearance="?attr/textAppearanceBodySmall"
-              android:visibility="visible"
-              android:src="@drawable/notifications"
-              android:layout_weight="1"
-              />
-        </LinearLayout>
+        <com.philkes.notallyx.presentation.view.misc.highlightableview.HighlightableTextView
+            android:id="@+id/Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurface"
+            android:textIsSelectable="false"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            app:layout_constraintTop_toBottomOf="@id/ReminderChip" />
 
         <TextView
             android:id="@+id/Date"
@@ -116,7 +112,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:alpha="@fraction/alpha_secondary"
-            app:layout_constraintTop_toBottomOf="@id/TitleLayout" />
+            app:layout_constraintTop_toBottomOf="@id/Title" />
 
         <LinearLayout
             android:id="@+id/FileViewLayout"
