@@ -91,6 +91,10 @@ class BaseNoteVH(
             }
 
             ReminderChip.setOnClickListener { listener.onReminderClick(absoluteAdapterPosition) }
+            ReminderChip.setOnLongClickListener {
+                listener.onLongClick(absoluteAdapterPosition)
+                return@setOnLongClickListener true
+            }
         }
     }
 
