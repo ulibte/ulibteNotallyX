@@ -137,6 +137,11 @@
     <string name="documentation">Documentation</string>
     <string name="donate">Faire un don</string>
     <string name="drag_handle">Poignée de glissement</string>
+    <string name="duplicate">Dupliquer</string>
+    <plurals name="duplicates">
+        <item quantity="one">%1$d note dupliquée</item>
+        <item quantity="other">%1$d notes dupliquées</item>
+    </plurals>
     <string name="edit">Modifier</string>
     <string name="edit_color">Éditer la couleur</string>
     <string name="edit_label">Modifier l\'étiquette</string>
@@ -321,6 +326,7 @@
     <string name="start_view_hint">Sélectionnez la vue/l\'étiquette à afficher au démarrage de l\'application.\nPar défaut, l’écran des notes est affichée.</string>
     <string name="stop">Arrêter</string>
     <string name="strikethrough">Barré</string>
+    <string name="super_dark">Noir</string>
     <string name="take_note">Prendre des notes</string>
     <string name="tap_for_more_options">Toucher pour afficher plus d\'options</string>
     <string name="tap_to_set_up">Toucher pour régler</string>
