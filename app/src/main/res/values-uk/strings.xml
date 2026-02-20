@@ -2,7 +2,7 @@
 <resources>
     <string name="about">Про додаток</string>
     <string name="add_images">Додати зображення</string>
-    <string name="add_item">Додати елемент</string>
+    <string name="add_item">Додати пункт</string>
     <string name="add_label">Додати мітку</string>
     <string name="add_reminder">Додати нагадування</string>
     <string name="adding_files">Додавання файлів</string>
@@ -26,6 +26,7 @@
     <string name="auto_backup_last">Останнє резервне копіювання</string>
     <string name="auto_backup_on_save">Автоматично створювати резервну копію при виході з додатку</string>
     <string name="auto_backup_on_save_hint">Якщо ввімкнути цей параметр, резервна копія («NotallyX_AutoBackup.zip») автоматично створюватиметься у вибраній папці щоразу при виході з нотатки.\nЗверніть увагу: це може вплинути на продуктивність пристрою</string>
+    <string name="auto_backup_skipped_files">Пропущено відсутніх вкладень (файлів/зображень): %1$d</string>
     <string name="auto_backups_folder">Папка резервних копій</string>
     <string name="auto_backups_folder_hint">Папка, у якій зберігатимуться всі автоматичні резервні копії.\nЯкщо ви хочете використовувати хмарне сховище або WebDAV, ознайомтеся з документацією (натисніть \"%1$s\")</string>
     <string name="auto_backups_folder_rechoose">Потрібно заново вибрати папку резервних копій, щоб NotallyX мав дозвіл на запис у неї.\nВи також можете натиснути «Скасувати», щоб пропустити імпорт налаштувань папки</string>
@@ -73,24 +74,27 @@
     <string name="choose_another_folder">Вибрати іншу папку</string>
     <string name="choose_folder">Вибрати папку</string>
     <string name="choose_other_app">Оберіть додаток, з якого потрібно імпортувати</string>
+    <string name="clean_up">Очистити</string>
+    <string name="cleanup_finished_summary">Вилучено відсутні вкладення (%1$d) із нотаток (%2$d)</string>
+    <string name="cleanup_finished_title">Очищення завершено</string>
     <string name="clear">Очистити</string>
     <string name="clear_data">Очистити дані</string>
     <string name="clear_data_message">Усі нотатки, зображення, файли та аудіозаписи будуть видалені назавжди</string>
     <string name="clear_formatting">Очистити форматування</string>
     <string name="cleared_data">Усі дані очищено</string>
-    <string name="color">Кольором</string>
+    <string name="color">Колір</string>
     <string name="color_exists">Цей колір уже існує!</string>
     <string name="content_density">Щільність вмісту</string>
     <string name="continue_">Продовжити</string>
     <string name="convert_to_list_note">Перетворити на список</string>
     <string name="convert_to_text_note">Перетворити на текстову нотатку</string>
     <string name="copied_link">Посилання скопійовано</string>
-    <string name="copy">Копіювати</string>
+    <string name="copy">Копія </string>
     <string name="crash_export_backup_failed">На жаль, не вдалося експортувати резервну копію.\nБудь ласка, скористайтеся кнопкою \'%1$s\', щоб повідомити про помилку</string>
     <string name="crash_export_backup_message">Ви можете спробувати створити резервну копію своїх нотаток, натиснувши \'%1$s\'.\nЦе може не спрацювати, якщо збій призвів до пошкодження даних. У такому разі, будь ласка, скористайтеся кнопкою \'%2$s\', щоб повідомити про помилку</string>
     <string name="crash_message">Сталася неочікувана помилка.\nПерепрошуємо за незручності.</string>
     <string name="create_github_issue">Повідомити про проблему на GitHub</string>
-    <string name="creation_date">Датою створення</string>
+    <string name="creation_date">Створено</string>
     <string name="custom">Користувацький</string>
     <string name="daily">Щодня</string>
     <string name="dark">Темна</string>
@@ -133,6 +137,11 @@
     <string name="documentation">Документація</string>
     <string name="donate">Підтримати розробку</string>
     <string name="drag_handle">Перетягніть вручну</string>
+    <string name="duplicate">Дублювати</string>
+    <plurals name="duplicates">
+        <item quantity="one">дублікатів: %1$d</item>
+        <item quantity="other">дублікатів: %1$d</item>
+    </plurals>
     <string name="edit">Редагувати</string>
     <string name="edit_color">Змінити колір</string>
     <string name="edit_label">Редагувати мітку</string>
@@ -148,9 +157,9 @@
     <string name="enabled">Увімкнено</string>
     <string name="error_while_renaming_file">Помилка під час перейменування файлу</string>
     <string name="error_while_renaming_image">Помилка під час перейменування зображення</string>
-    <string name="evernote">Імпорт із Evernote</string>
+    <string name="evernote">Імпортувати із Evernote</string>
     <string name="evernote_help">Щоб імпортувати нотатки з Evernote, вам потрібно експортувати блокнот Evernote у форматі ENEX. Натисніть «Довідка», щоб дізнатися більше.\n\nЯкщо у вас уже є файл ENEX, натисніть «Імпортувати» та виберіть його.</string>
-    <string name="every">Усі</string>
+    <string name="every">Загальні</string>
     <string name="export">Експорт</string>
     <string name="export_backup">Експорт резервної копії</string>
     <string name="export_settings">Експорт налаштувань</string>
@@ -200,7 +209,7 @@
     <string name="invalid_image">Некоректне зображення</string>
     <string name="invalid_link">Скопіюйте коректне посилання в буфер обміну</string>
     <string name="italic">Курсив</string>
-    <string name="item">Елемент</string>
+    <string name="item">Пункт</string>
     <string name="json_files">JSON-файли</string>
     <string name="json_files_help">Щоб імпортувати ваші нотатки з JSON-файлів (окремого файлу або папки), натисніть «Імпортувати». Кожен коректний JSON-файл буде імпортовано як окрему нотатку, а назва файлу стане заголовком нотатки.</string>
     <string name="label_exists">Мітка вже існує</string>
@@ -214,18 +223,21 @@
     <string name="link">Посилання</string>
     <string name="link_note">Прив\'язати нотатку</string>
     <string name="list">Список</string>
-    <string name="list_item_auto_sort">Сортувати елементи списку</string>
+    <string name="list_item_auto_sort">Сортувати пункти списку</string>
     <string name="locked">Заблоковано</string>
     <string name="make_feature_request">Запропонувати функцію</string>
     <string name="make_list">Створити список</string>
     <string name="max_backups">Кількість резервних копій для зберігання</string>
-    <string name="max_items_to_display">Макс. кількість елементів у списку</string>
+    <string name="max_items_to_display">Макс. кількість пунктів у списку</string>
     <string name="max_labels_to_display">Макс. кількість міток у навігації</string>
     <string name="max_lines_to_display">Макс. кількість рядків в нотатці</string>
     <string name="max_lines_to_display_title">Макс. кількість рядків у заголовку</string>
     <string name="medium">Середній</string>
+    <string name="migrating_data">Перенесення даних…</string>
+    <string name="migration_moving_attachments">Перенесення вкладень…</string>
+    <string name="migration_splitting_notes">Розділення надто великих нотаток…</string>
     <string name="minutes">Хвилини</string>
-    <string name="modified_date">Датою зміни</string>
+    <string name="modified_date">Змінено</string>
     <string name="monospace">Моноширинний</string>
     <string name="monthly">Щомісяця</string>
     <string name="months">Місяці</string>
@@ -235,13 +247,19 @@
         <item quantity="other">…ще %1$d файлів</item>
     </plurals>
     <string name="new_color">Новий колір</string>
-    <string name="next">Далі</string>
+    <string name="next">Наступне</string>
     <string name="no_auto_sort">Без автосортування</string>
     <string name="none">Немає</string>
     <string name="not_exists">%1$s\' не існує</string>
     <string name="note">Нотатка</string>
+    <string name="note_text_too_long_truncated">Текст занадто довгий, скорочено до %1$d символів</string>
+    <string name="note_too_big_truncating">Нотатка занадто велика для збереження, її було скорочено до %1$s символів (було: %2$s)</string>
     <string name="notes">Нотатки</string>
     <string name="notes_sorted_by">Сортувати за</string>
+    <plurals name="notes_too_big_truncating">
+        <item quantity="one">Нотатка %1$s занадто велика для збереження; її було скорочено до %2$s символів.</item>
+        <item quantity="other">Кількість нотаток, завеликих для збереження: %1$s. Скорочено до %2$s символів.</item>
+    </plurals>
     <string name="open_link">Відкрити посилання</string>
     <string name="open_note">Відкрити нотатку</string>
     <string name="others">Інші</string>
@@ -315,14 +333,14 @@
     <string name="text_size">Розмір тексту</string>
     <string name="theme">Тема</string>
     <string name="theme_use_dynamic_colors">Використовувати кольори системних шпалер</string>
-    <string name="title">Назвою</string>
+    <string name="title">Назва</string>
     <string name="to_record_audio">Щоб записувати аудіо, дозвольте застосунку NotallyX доступ до мікрофона. Торкніться Налаштування &gt; Дозволи та ввімкніть Мікрофон</string>
     <string name="unarchive">Розархівувати</string>
     <plurals name="unarchived_selected_notes">
         <item quantity="one">Розархівовано нотаток: %1$d</item>
         <item quantity="other">Розархівовано нотаток: %1$d</item>
     </plurals>
-    <string name="uncheck_all_items">Зняти позначки з усіх елементів</string>
+    <string name="uncheck_all_items">Зняти позначки з усіх пунктів</string>
     <string name="undo">Відмінити</string>
     <string name="unknown_error">Невідома помилка</string>
     <string name="unknown_name">Невідома назва</string>
