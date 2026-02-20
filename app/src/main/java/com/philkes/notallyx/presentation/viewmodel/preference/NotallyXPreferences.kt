@@ -115,6 +115,15 @@ class NotallyXPreferences private constructor(private val context: Context) {
     val periodicBackups = PeriodicBackupsPreference(preferences)
     val periodicBackupLastExecution =
         LongPreference("periodicBackupLastExecution", preferences, -1L)
+    val autoRemoveDeletedNotesAfterDays =
+        IntPreference(
+            "autoRemoveDeletedNotesAfterDays",
+            preferences,
+            0,
+            0,
+            365,
+            R.string.auto_remove_deleted_notes,
+        )
 
     val backupPassword by lazy {
         StringPreference(
@@ -262,6 +271,7 @@ class NotallyXPreferences private constructor(private val context: Context) {
                 backupOnSave,
                 autoSaveAfterIdleTime,
                 imagesHiddenInOverview,
+                autoRemoveDeletedNotesAfterDays,
             )
             .forEach { it.refresh() }
     }

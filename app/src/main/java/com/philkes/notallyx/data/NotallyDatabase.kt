@@ -12,6 +12,7 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.philkes.notallyx.NotallyXApplication.Companion.isTestRunner
 import com.philkes.notallyx.data.dao.BaseNoteDao
 import com.philkes.notallyx.data.dao.CommonDao
 import com.philkes.notallyx.data.dao.LabelDao
@@ -113,13 +114,30 @@ abstract class NotallyDatabase : RoomDatabase() {
                 }
         }
 
+        private var testInstance: NotallyDatabase? = null
+
+        private fun getTestDatabase(context: ContextWrapper): NotallyDatabase {
+            return testInstance
+                ?: synchronized(this) {
+                    testInstance =
+                        Room.inMemoryDatabaseBuilder(context, NotallyDatabase::class.java)
+                            .allowMainThreadQueries()
+                            .build()
+                    return testInstance!!
+                }
+        }
+
         fun getFreshDatabase(context: ContextWrapper, dataInPublic: Boolean): NotallyDatabase {
-            return createInstance(
-                context,
-                NotallyXPreferences.getInstance(context),
-                false,
-                dataInPublic = dataInPublic,
-            )
+            return if (isTestRunner()) {
+                getTestDatabase(context)
+            } else {
+                createInstance(
+                    context,
+                    NotallyXPreferences.getInstance(context),
+                    false,
+                    dataInPublic = dataInPublic,
+                )
+            }
         }
 
         private fun createInstance(

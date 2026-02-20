@@ -3,6 +3,7 @@ package com.philkes.notallyx.presentation.activity.main.fragment.settings
 import android.content.Context
 import android.hardware.biometrics.BiometricManager
 import android.net.Uri
+import android.os.Build
 import android.text.method.PasswordTransformationMethod
 import android.view.LayoutInflater
 import android.view.View
@@ -460,9 +461,15 @@ fun PreferenceSeekbarBinding.setup(
     max: Int,
     context: Context,
     enabled: Boolean = true,
+    tooltipResId: Int? = null,
     onChange: (newValue: Int) -> Unit,
 ) {
-    Title.setText(titleResId)
+    Title.apply {
+        setText(titleResId)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            tooltipResId?.let { tooltipText = context.getString(tooltipResId) }
+        }
+    }
     val valueInBoundaries = (if (value < min) min else if (value > max) max else value).toFloat()
     Slider.apply {
         isEnabled = enabled
@@ -487,9 +494,17 @@ fun PreferenceSeekbarBinding.setup(
     preference: IntPreference,
     context: Context,
     value: Int = preference.value,
+    tooltipResId: Int? = null,
     onChange: (newValue: Int) -> Unit,
 ) {
-    setup(value, preference.titleResId!!, preference.min, preference.max, context) { newValue ->
+    setup(
+        value,
+        preference.titleResId!!,
+        preference.min,
+        preference.max,
+        context,
+        tooltipResId = tooltipResId,
+    ) { newValue ->
         onChange(newValue)
     }
 }
@@ -514,7 +529,23 @@ fun PreferenceSeekbarBinding.setupAutoSaveIdleTime(
             }
         }
     }
-    setup(preference, context, value, onChange)
+    setup(preference, context, value, onChange = onChange)
+}
+
+fun PreferenceSeekbarBinding.setupAutoEmptyBin(
+    preference: IntPreference,
+    context: Context,
+    value: Int = preference.value,
+    onChange: (newValue: Int) -> Unit,
+) {
+    Slider.apply {
+        setLabelFormatter { sliderValue ->
+            if (sliderValue == 0f) {
+                context.getString(R.string.disabled)
+            } else "${sliderValue.toInt()} ${context.getString(R.string.days)}"
+        }
+    }
+    setup(preference, context, value, R.string.auto_remove_deleted_notes_hint, onChange)
 }
 
 fun PreferenceBinding.setupStartView(

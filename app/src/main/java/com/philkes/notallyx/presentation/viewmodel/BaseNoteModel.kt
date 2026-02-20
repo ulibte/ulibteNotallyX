@@ -631,7 +631,11 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
         viewModelScope.launch(
             Dispatchers.IO
         ) { // Only reminders of notes in NOTES folder are active
-            baseNoteDao.move(ids, folder)
+            if (folder == Folder.DELETED) {
+                baseNoteDao.move(ids, folder, System.currentTimeMillis())
+            } else {
+                baseNoteDao.move(ids, folder)
+            }
             val notes = baseNoteDao.getByIds(ids).toNoteIdReminders()
             // Only reminders of notes in NOTES folder are active
             when (folder) {
