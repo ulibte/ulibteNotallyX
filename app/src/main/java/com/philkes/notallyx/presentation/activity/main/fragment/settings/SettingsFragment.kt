@@ -24,10 +24,12 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.work.WorkManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
 import com.philkes.notallyx.NotallyXApplication
 import com.philkes.notallyx.R
+import com.philkes.notallyx.cancelAutoRemoveOldDeletedNotes
 import com.philkes.notallyx.data.imports.FOLDER_OR_FILE_MIMETYPE
 import com.philkes.notallyx.data.imports.ImportSource
 import com.philkes.notallyx.data.imports.txt.APPLICATION_TEXT_MIME_TYPES
@@ -51,6 +53,7 @@ import com.philkes.notallyx.presentation.viewmodel.preference.PeriodicBackup
 import com.philkes.notallyx.presentation.viewmodel.preference.PeriodicBackup.Companion.BACKUP_MAX_MIN
 import com.philkes.notallyx.presentation.viewmodel.preference.PeriodicBackup.Companion.BACKUP_PERIOD_DAYS_MIN
 import com.philkes.notallyx.presentation.viewmodel.preference.PeriodicBackupsPreference
+import com.philkes.notallyx.scheduleAutoRemoveOldDeletedNotes
 import com.philkes.notallyx.utils.MIME_TYPE_JSON
 import com.philkes.notallyx.utils.MIME_TYPE_ZIP
 import com.philkes.notallyx.utils.backup.exportPreferences
@@ -334,6 +337,23 @@ class SettingsFragment : Fragment() {
             binding.CheckedListItemSorting.setup(listItemSorting, value, requireContext()) {
                 newValue ->
                 model.savePreference(listItemSorting, newValue)
+            }
+        }
+
+        autoRemoveDeletedNotesAfterDays.observe(viewLifecycleOwner) { value ->
+            binding.AutoEmptyBin.setupAutoEmptyBin(
+                autoRemoveDeletedNotesAfterDays,
+                requireContext(),
+            ) { newValue ->
+                model.savePreference(autoRemoveDeletedNotesAfterDays, newValue)
+                val workManager = WorkManager.getInstance(requireContext())
+                if (newValue > 0) {
+                    workManager.scheduleAutoRemoveOldDeletedNotes(
+                        requireContext() as ContextWrapper
+                    )
+                } else {
+                    workManager.cancelAutoRemoveOldDeletedNotes()
+                }
             }
         }
 

@@ -26,6 +26,7 @@
     <string name="auto_backup_last">Letztes Backup</string>
     <string name="auto_backup_on_save">Autom. Backup beim Notiz Verlassen</string>
     <string name="auto_backup_on_save_hint">Ist dies aktiviert, wird jedesmal wenn eine Notiz verlassen wird autom. ein Backup (\"NotallyX_AutoBackup.zip\") im \"Backups Ordner\" erstellt.\nDies kann die App-Performance beeinträchtigen</string>
+    <string name="auto_backup_skipped_files">%1$d fehlende angehängte Dateien/Bilder übersprungen</string>
     <string name="auto_backups_folder">Backups Ordner</string>
     <string name="auto_backups_folder_hint">Ordner in dem alle autom. Backups erstellt werden</string>
     <string name="auto_backups_folder_rechoose">Der Backups Ordner muss erneut ausgewählt werden, damit NotallyX Schreibrechte dafür erhält.\nÜber Abbrechen kann der Import dieser Einstellung übersprungen werden.</string>
@@ -40,6 +41,7 @@
     <string name="backup_periodic">Periodische Backups</string>
     <string name="backup_periodic_hint">Ist dies aktiviert, werden autom. Backups im eingestellten Backups Ordner erstellt. \nDies könnte fehlschlagen wenn Energiesparmodus aktiviert ist</string>
     <string name="behaviour">Funktionsweise</string>
+    <string name="biometric_backup_advice">Es wird empfohlen ein komplettes Backup zu erstellen bevor die Biometrische/PIN Sperre de-/aktiviert wird, für den Fall dass die Verschlüsselung fehlschlägt</string>
     <string name="biometric_lock">App per Biometrie/PIN sperren</string>
     <string name="biometrics_disable_success">Biometrische/PIN Sperre deaktiviert</string>
     <string name="biometrics_failure">Fehler bei Authentifizierung per Biometrie/PIN</string>
@@ -72,6 +74,9 @@
     <string name="choose_another_folder">Anderen Ordner wählen</string>
     <string name="choose_folder">Ordner wählen</string>
     <string name="choose_other_app">Wähle von welcher App importiert werden soll</string>
+    <string name="clean_up">Cleanup</string>
+    <string name="cleanup_finished_summary">%1$d fehlende Anhänge für %2$d Notizen wurden entfernt</string>
+    <string name="cleanup_finished_title">Cleanup abgeschlossen</string>
     <string name="clear">Löschen</string>
     <string name="clear_data">Alle Daten löschen</string>
     <string name="clear_data_message">Alle Notizen, Bilder, Dateien und Sprachnotizen werden permanent gelöscht</string>
@@ -132,6 +137,11 @@
     <string name="documentation">Dokumentation</string>
     <string name="donate">Spende</string>
     <string name="drag_handle">Ziehgriff</string>
+    <string name="duplicate">Duplizieren</string>
+    <plurals name="duplicates">
+        <item quantity="one">%1$d Duplikat</item>
+        <item quantity="other">%1$d Duplikate</item>
+    </plurals>
     <string name="edit">Bearbeiten</string>
     <string name="edit_color">Farbe bearbeiten</string>
     <string name="edit_label">Label bearbeiten</string>
@@ -223,6 +233,9 @@
     <string name="max_lines_to_display">Maximal angezeigte Zeilen</string>
     <string name="max_lines_to_display_title">Maximal angezeigte Zeilen im Titel</string>
     <string name="medium">Mittel</string>
+    <string name="migrating_data">Migriere Daten…</string>
+    <string name="migration_moving_attachments">Verschiebe Anhänge…</string>
+    <string name="migration_splitting_notes">Teile zu große Notizen auf…</string>
     <string name="minutes">Minuten</string>
     <string name="modified_date">Geändert</string>
     <string name="monospace">Monospace</string>
@@ -239,8 +252,14 @@
     <string name="none">Keines</string>
     <string name="not_exists">\'%1$d’ existiert nicht</string>
     <string name="note">Notiz</string>
+    <string name="note_text_too_long_truncated">Text zu lang, wird auf %1$d Zeichen gekürzt</string>
+    <string name="note_too_big_truncating">Notiz überschreitet Maximallänge, es wird auf %1$s Zeichen gekürzt (vorher: %2$s)</string>
     <string name="notes">Notizen</string>
     <string name="notes_sorted_by">Notizen sortieren nach</string>
+    <plurals name="notes_too_big_truncating">
+        <item quantity="one">%1$s Notiz überschreitet Maximallänge, es wird auf %2$s Zeichen gekürzt</item>
+        <item quantity="other">%1$s Notizen überschreiten Maximallänge, sie werden auf %2$s Zeichen gekürzt</item>
+    </plurals>
     <string name="open_link">Link öffnen</string>
     <string name="open_note">Notiz öffnen</string>
     <string name="others">Andere</string>
@@ -307,6 +326,7 @@
     <string name="start_view_hint">Wähle aus welche Ansicht beim Start der App geöffnet werden soll</string>
     <string name="stop">Stop</string>
     <string name="strikethrough">Durchstreichen</string>
+    <string name="super_dark">Super Dunkel</string>
     <string name="take_note">Notiz erstellen</string>
     <string name="tap_for_more_options">Klick für mehr Optionen</string>
     <string name="tap_to_set_up">Zum Einrichten antippen</string>

@@ -32,6 +32,8 @@
     <string name="auto_backups_folder_hint">Folder in which all auto backups will be stored in.\nIf you want to use Cloud-Storage/WebDAV for your backups, please read the docs (click \"%1$s\")</string>
     <string name="auto_backups_folder_rechoose">You need to re-choose your Backups Folder so that NotallyX has permission to write to it.\nYou can also press cancel to skip importing Backups Folder value</string>
     <string name="auto_backups_folder_set">Set up a Backups Folder above first</string>
+    <string name="auto_remove_deleted_notes">Auto remove deleted Notes permanently after</string>
+    <string name="auto_remove_deleted_notes_hint">By enabling this, Notes that were deleted will be permanently removed after X days</string>
     <string name="auto_save_after_idle_time">Auto save note after specified idle time</string>
     <string name="auto_sort_by_checked">Sort checked items to the end</string>
     <string name="back">Back</string>

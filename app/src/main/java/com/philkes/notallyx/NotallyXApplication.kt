@@ -3,15 +3,21 @@ package com.philkes.notallyx
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Observer
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.android.material.color.DynamicColors
+import com.philkes.notallyx.NotallyXApplication.Companion.AUTO_REMOVE_DELETED_NOTES
+import com.philkes.notallyx.NotallyXApplication.Companion.TAG
 import com.philkes.notallyx.presentation.setEnabledSecureFlag
 import com.philkes.notallyx.presentation.view.misc.NotNullLiveData
 import com.philkes.notallyx.presentation.viewmodel.preference.BiometricLock
@@ -19,6 +25,7 @@ import com.philkes.notallyx.presentation.viewmodel.preference.NotallyXPreference
 import com.philkes.notallyx.presentation.viewmodel.preference.NotallyXPreferences.Companion.EMPTY_PATH
 import com.philkes.notallyx.presentation.viewmodel.preference.Theme
 import com.philkes.notallyx.presentation.widget.WidgetProvider
+import com.philkes.notallyx.utils.AutoRemoveDeletedNotesWorker
 import com.philkes.notallyx.utils.backup.AUTO_BACKUP_WORK_NAME
 import com.philkes.notallyx.utils.backup.autoBackupOnSave
 import com.philkes.notallyx.utils.backup.autoBackupOnSaveFileExists
@@ -30,6 +37,7 @@ import com.philkes.notallyx.utils.backup.isEqualTo
 import com.philkes.notallyx.utils.backup.modifiedNoteBackupExists
 import com.philkes.notallyx.utils.backup.scheduleAutoBackup
 import com.philkes.notallyx.utils.backup.updateAutoBackup
+import com.philkes.notallyx.utils.log
 import com.philkes.notallyx.utils.observeOnce
 import com.philkes.notallyx.utils.security.UnlockReceiver
 import java.util.concurrent.TimeUnit
@@ -93,6 +101,9 @@ class NotallyXApplication : Application(), Application.ActivityLifecycleCallback
         preferences.periodicBackups.observeForever { value ->
             val backupFolder = preferences.backupsFolder.value
             checkUpdatePeriodicBackup(backupFolder, backupFolder, value.periodInDays.toLong())
+        }
+        preferences.autoRemoveDeletedNotesAfterDays.observeForever { value ->
+            checkUpdateAutoRemoveOldDeletedNotes(value)
         }
 
         val filter = IntentFilter().apply { addAction(Intent.ACTION_SCREEN_OFF) }
@@ -199,6 +210,15 @@ class NotallyXApplication : Application(), Application.ActivityLifecycleCallback
         }
     }
 
+    private fun checkUpdateAutoRemoveOldDeletedNotes(days: Int) {
+        val workManager = getWorkManagerSafe() ?: return
+        if (days > 0) {
+            workManager.scheduleAutoRemoveOldDeletedNotes(this)
+        } else {
+            workManager.cancelAutoRemoveOldDeletedNotes()
+        }
+    }
+
     private fun getWorkManagerSafe(): WorkManager? {
         return try {
             WorkManager.getInstance(this)
@@ -229,8 +249,33 @@ class NotallyXApplication : Application(), Application.ActivityLifecycleCallback
     override fun onActivityDestroyed(activity: Activity) {}
 
     companion object {
-        private fun isTestRunner(): Boolean {
+        const val TAG = "NotallyXApplication"
+        const val AUTO_REMOVE_DELETED_NOTES = "com.philkes.notallyx.AutoRemoveDeletedNotes"
+
+        fun isTestRunner(): Boolean {
             return Build.FINGERPRINT.equals("robolectric", ignoreCase = true)
         }
     }
+}
+
+fun WorkManager.scheduleAutoRemoveOldDeletedNotes(context: ContextWrapper) {
+    Log.d(TAG, "Scheduling auto removal of old deleted notes")
+    val request =
+        PeriodicWorkRequest.Builder(AutoRemoveDeletedNotesWorker::class.java, 1, TimeUnit.DAYS)
+            .build()
+    try {
+        enqueueUniquePeriodicWork(
+            AUTO_REMOVE_DELETED_NOTES,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request,
+        )
+    } catch (e: IllegalStateException) {
+        // only happens in Unit-Tests
+        context.log(TAG, "Scheduling auto removal of old deleted notes failed", throwable = e)
+    }
+}
+
+fun WorkManager.cancelAutoRemoveOldDeletedNotes() {
+    Log.d(TAG, "Cancelling auto removal of old deleted notes")
+    cancelUniqueWork(AUTO_REMOVE_DELETED_NOTES)
 }
