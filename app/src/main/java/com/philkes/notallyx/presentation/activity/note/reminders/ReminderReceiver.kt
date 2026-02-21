@@ -76,7 +76,12 @@ class ReminderReceiver : BroadcastReceiver() {
         }
     }
 
-    private suspend fun notify(context: Context, noteId: Long, reminderId: Long) {
+    private suspend fun notify(
+        context: Context,
+        noteId: Long,
+        reminderId: Long,
+        schedule: Boolean = true,
+    ) {
         Log.d(TAG, "notify: noteId: $noteId reminderId: $reminderId")
         val database = getDatabase(context)
         val manager = context.getSystemService<NotificationManager>()!!
@@ -104,7 +109,8 @@ class ReminderReceiver : BroadcastReceiver() {
                 .find { it.id == reminderId }
                 ?.let { reminder: Reminder ->
                     manager.notify(note.id.toString(), reminderId.toInt(), notification)
-                    context.scheduleReminder(note.id, reminder, forceRepetition = true)
+                    if (schedule)
+                        context.scheduleReminder(note.id, reminder, forceRepetition = true)
                     setIsNotificationVisible(true, context, note.id, reminderId)
                 }
         }
@@ -191,7 +197,7 @@ class ReminderReceiver : BroadcastReceiver() {
                     .filter { it.dateTime <= now } // Only reminders that have already passed
                     .maxByOrNull { it.dateTime } ?: return@forEach
             if (mostRecentReminder.isNotificationVisible) {
-                notify(context, note.id, mostRecentReminder.id)
+                notify(context, note.id, mostRecentReminder.id, schedule = false)
             }
         }
     }
