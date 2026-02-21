@@ -95,8 +95,8 @@ class ReminderReceiver : BroadcastReceiver() {
             val notification =
                 NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(R.drawable.notebook)
-                    .setContentTitle(note.title) // Set title from intent
-                    .setContentText(note.body.truncate(200)) // Set content text from intent
+                    .setContentTitle(note.title)
+                    .setContentText(note.body.truncate(200))
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .addAction(
                         R.drawable.visibility,
