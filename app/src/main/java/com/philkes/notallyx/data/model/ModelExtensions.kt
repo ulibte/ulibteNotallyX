@@ -12,10 +12,8 @@ import com.philkes.notallyx.presentation.applySpans
 import com.philkes.notallyx.utils.decodeToBitmap
 import java.io.File
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -322,8 +320,6 @@ fun BaseNote.attachmentsDifferFrom(other: BaseNote): Boolean {
         audios.any { audio -> other.audios.none { it.name == audio.name } } ||
         other.audios.any { audio -> audios.none { it.name == audio.name } }
 }
-
-fun Date.toText(): String = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(this)
 
 fun Repetition.toText(context: Context): String =
     when {

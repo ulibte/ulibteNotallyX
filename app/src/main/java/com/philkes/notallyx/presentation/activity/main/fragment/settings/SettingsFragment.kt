@@ -33,10 +33,10 @@ import com.philkes.notallyx.cancelAutoRemoveOldDeletedNotes
 import com.philkes.notallyx.data.imports.FOLDER_OR_FILE_MIMETYPE
 import com.philkes.notallyx.data.imports.ImportSource
 import com.philkes.notallyx.data.imports.txt.APPLICATION_TEXT_MIME_TYPES
-import com.philkes.notallyx.data.model.toText
 import com.philkes.notallyx.databinding.DialogTextInputBinding
 import com.philkes.notallyx.databinding.FragmentSettingsBinding
 import com.philkes.notallyx.presentation.activity.main.MainActivity
+import com.philkes.notallyx.presentation.format
 import com.philkes.notallyx.presentation.setCancelButton
 import com.philkes.notallyx.presentation.setEnabledSecureFlag
 import com.philkes.notallyx.presentation.setupImportProgressDialog
@@ -600,7 +600,7 @@ class SettingsFragment : Fragment() {
                 if (time != -1L) {
                     isVisible = true
                     text =
-                        "${requireContext().getString(R.string.auto_backup_last)}: ${Date(time).toText()}"
+                        "${requireContext().getString(R.string.auto_backup_last)}: ${Date(time).format()}"
                 } else isVisible = false
             }
         }
