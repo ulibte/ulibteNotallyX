@@ -14,6 +14,7 @@ import androidx.core.content.getSystemService
 import com.philkes.notallyx.R
 import com.philkes.notallyx.data.NotallyDatabase
 import com.philkes.notallyx.data.model.Reminder
+import com.philkes.notallyx.data.model.findLastNotified
 import com.philkes.notallyx.utils.canScheduleAlarms
 import com.philkes.notallyx.utils.cancelReminder
 import com.philkes.notallyx.utils.createChannelIfNotExists
@@ -68,7 +69,10 @@ class ReminderReceiver : BroadcastReceiver() {
                     intent.action == ACTION_NOTIFICATION_DISMISSED -> {
                         val noteId = intent.getLongExtra(EXTRA_NOTE_ID, -1L)
                         val reminderId = intent.getLongExtra(EXTRA_REMINDER_ID, -1L)
-                        Log.d(TAG, "Notification dismissed for note: $noteId")
+                        Log.d(
+                            TAG,
+                            "Notification dismissed for noteId: $noteId, reminderId: $reminderId",
+                        )
                         setIsNotificationVisible(false, context, noteId, reminderId)
                     }
                 }
@@ -191,11 +195,7 @@ class ReminderReceiver : BroadcastReceiver() {
         val baseNoteDao = getDatabase(context).getBaseNoteDao()
         val allNotes = baseNoteDao.getAllNotes()
         allNotes.forEach { note ->
-            val now = Date(System.currentTimeMillis())
-            val mostRecentReminder =
-                note.reminders
-                    .filter { it.dateTime <= now } // Only reminders that have already passed
-                    .maxByOrNull { it.dateTime } ?: return@forEach
+            val mostRecentReminder = note.reminders.findLastNotified() ?: return@forEach
             if (mostRecentReminder.isNotificationVisible) {
                 notify(context, note.id, mostRecentReminder.id, schedule = false)
             }
