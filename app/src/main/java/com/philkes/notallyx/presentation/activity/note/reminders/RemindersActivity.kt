@@ -180,7 +180,7 @@ class RemindersActivity : LockedActivity<ActivityRemindersBinding>(), ReminderLi
             alsoCheckAlarmPermission = true,
             alarmPermissionResultLauncher = alarmPermissionActivityResultLauncher,
         ) {
-            DatePickerFragment(calendar?.time ?: reminder?.dateTime) { _, year, month, day ->
+            DatePickerFragment(calendar?.time ?: reminder?.dateTime) { year, month, day ->
                     val usedCalendar = calendar ?: reminder?.dateTime?.toCalendar() ?: now()
                     usedCalendar.set(year, month, day)
                     showTimePickerDialog(reminder, usedCalendar)

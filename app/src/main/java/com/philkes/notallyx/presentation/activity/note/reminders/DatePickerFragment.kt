@@ -1,24 +1,40 @@
 package com.philkes.notallyx.presentation.activity.note.reminders
 
-import android.app.DatePickerDialog
-import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.philkes.notallyx.utils.now
 import java.util.Calendar
 import java.util.Date
 
 class DatePickerFragment(
     private val date: Date?,
-    private val listener: DatePickerDialog.OnDateSetListener,
+    private val onDateSetListener: (year: Int, month: Int, day: Int) -> Unit,
 ) : DialogFragment() {
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         val now = now()
         val c = date?.let { Calendar.getInstance().apply { time = it } } ?: now
-        val year = c.get(Calendar.YEAR)
-        val month = c.get(Calendar.MONTH)
-        val day = c.get(Calendar.DAY_OF_MONTH)
-        return DatePickerDialog(requireContext(), listener, year, month, day)
+
+        val datePicker =
+            MaterialDatePicker.Builder.datePicker().setSelection(c.timeInMillis).build()
+
+        datePicker.addOnPositiveButtonClickListener { selection ->
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = selection
+            onDateSetListener(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH),
+            )
+        }
+
+        datePicker.addOnCancelListener { dismiss() }
+
+        datePicker.addOnNegativeButtonClickListener { dismiss() }
+
+        datePicker.show(parentFragmentManager, "DatePicker")
+        dismiss()
     }
 }
