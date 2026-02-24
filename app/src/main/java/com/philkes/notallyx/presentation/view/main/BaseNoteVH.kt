@@ -26,13 +26,13 @@ import com.philkes.notallyx.data.model.ListItem
 import com.philkes.notallyx.data.model.SpanRepresentation
 import com.philkes.notallyx.data.model.Type
 import com.philkes.notallyx.data.model.findNextNotificationDate
-import com.philkes.notallyx.data.model.toText
 import com.philkes.notallyx.databinding.RecyclerBaseNoteBinding
 import com.philkes.notallyx.presentation.applySpans
 import com.philkes.notallyx.presentation.bindLabels
 import com.philkes.notallyx.presentation.displayFormattedTimestamp
 import com.philkes.notallyx.presentation.dp
 import com.philkes.notallyx.presentation.extractColor
+import com.philkes.notallyx.presentation.format
 import com.philkes.notallyx.presentation.getQuantityString
 import com.philkes.notallyx.presentation.setControlsContrastColorForAllViews
 import com.philkes.notallyx.presentation.view.misc.ItemListener
@@ -418,7 +418,7 @@ class BaseNoteVH(
         }
         binding.ReminderChip.apply {
             visibility = VISIBLE
-            text = mostRecentNotificationDate.toText()
+            text = mostRecentNotificationDate.format()
             val isElapsed = mostRecentNotificationDate < now
             alpha = if (isElapsed) 0.5f else 1.0f
             paintFlags =

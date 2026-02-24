@@ -5,7 +5,12 @@ import java.util.Date
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Reminder(var id: Long, var dateTime: Date, var repetition: Repetition?) : Parcelable
+data class Reminder(
+    var id: Long,
+    var dateTime: Date,
+    var repetition: Repetition?,
+    var isNotificationVisible: Boolean = false,
+) : Parcelable
 
 @Parcelize data class Repetition(var value: Int, var unit: RepetitionTimeUnit) : Parcelable
 

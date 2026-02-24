@@ -11,8 +11,8 @@ import androidx.core.content.getSystemService
 import com.philkes.notallyx.data.dao.NoteIdReminder
 import com.philkes.notallyx.data.model.Reminder
 import com.philkes.notallyx.data.model.nextRepetition
-import com.philkes.notallyx.data.model.toText
 import com.philkes.notallyx.presentation.activity.note.reminders.ReminderReceiver
+import com.philkes.notallyx.presentation.format
 import java.util.Date
 
 private const val TAG = "ReminderExtensions"
@@ -24,14 +24,14 @@ fun Context.scheduleReminder(noteId: Long, reminder: Reminder, forceRepetition: 
             val nextRepetition = reminder.nextRepetition(now)!!
             Log.d(
                 TAG,
-                "scheduleReminder: noteId: $noteId reminderId: ${reminder.id} nextRepetition: ${nextRepetition.toText()}",
+                "scheduleReminder: noteId: $noteId reminderId: ${reminder.id} nextRepetition: ${nextRepetition.format()}",
             )
             scheduleReminder(noteId, reminder.id, nextRepetition)
         }
     } else {
         Log.d(
             TAG,
-            "scheduleReminder: noteId: $noteId reminderId: ${reminder.id} dateTime: ${reminder.dateTime.toText()}",
+            "scheduleReminder: noteId: $noteId reminderId: ${reminder.id} dateTime: ${reminder.dateTime.format()}",
         )
         scheduleReminder(noteId, reminder.id, reminder.dateTime)
     }

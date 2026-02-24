@@ -1,32 +1,44 @@
 package com.philkes.notallyx.presentation.activity.note.reminders
 
-import android.app.Dialog
-import android.app.TimePickerDialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.text.format.DateFormat
 import androidx.fragment.app.DialogFragment
-import com.philkes.notallyx.R
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import java.util.Calendar
 
 class TimePickerFragment(private val calendar: Calendar, private val listener: TimePickerListener) :
     DialogFragment() {
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val minute = calendar.get(Calendar.MINUTE)
-        val dialog =
-            TimePickerDialog(activity, listener, hour, minute, DateFormat.is24HourFormat(activity))
-        dialog.setButton(
-            DialogInterface.BUTTON_NEGATIVE,
-            requireContext().getText(R.string.back),
-        ) { _, _ ->
-            listener.onBack()
+        val is24Hour = DateFormat.is24HourFormat(requireContext())
+
+        val timePicker =
+            MaterialTimePicker.Builder()
+                .setTimeFormat(if (is24Hour) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H)
+                .setHour(hour)
+                .setMinute(minute)
+                .build()
+
+        timePicker.addOnPositiveButtonClickListener {
+            listener.onTimeSet(null, timePicker.hour, timePicker.minute)
         }
-        return dialog
+        timePicker.addOnNegativeButtonClickListener {
+            listener.onBack()
+            dismiss()
+        }
+        timePicker.addOnCancelListener { dismiss() }
+
+        timePicker.show(parentFragmentManager, "TimePicker")
+        dismiss()
     }
 }
 
-interface TimePickerListener : TimePickerDialog.OnTimeSetListener {
+interface TimePickerListener {
+    fun onTimeSet(view: android.widget.TimePicker?, hourOfDay: Int, minute: Int)
+
     fun onBack()
 }

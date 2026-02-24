@@ -1,5 +1,14 @@
 # Changelog
 
+## [v7.8.1](https://github.com/Crustack/NotallyX/tree/v7.8.1) (2026-02-21)
+
+[Full Changelog](https://github.com/Crustack/NotallyX/compare/v7.8.0...v7.8.1)
+
+### Fixed Bugs
+
+- Video can't be played [\#849](https://github.com/Crustack/NotallyX/issues/849)
+- Inability to edit external txt files [\#847](https://github.com/Crustack/NotallyX/issues/847)
+
 ## [v7.8.0](https://github.com/Crustack/NotallyX/tree/v7.8.0) (2026-02-20)
 
 [Full Changelog](https://github.com/Crustack/NotallyX/compare/v7.7.0...v7.8.0)

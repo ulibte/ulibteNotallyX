@@ -12,10 +12,8 @@ import com.philkes.notallyx.presentation.applySpans
 import com.philkes.notallyx.utils.decodeToBitmap
 import java.io.File
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -323,8 +321,6 @@ fun BaseNote.attachmentsDifferFrom(other: BaseNote): Boolean {
         other.audios.any { audio -> audios.none { it.name == audio.name } }
 }
 
-fun Date.toText(): String = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(this)
-
 fun Repetition.toText(context: Context): String =
     when {
         value == 1 && unit == RepetitionTimeUnit.DAYS -> context.getString(R.string.daily)
@@ -360,6 +356,31 @@ fun RepetitionTimeUnit.toCalendarField(): Int {
     }
 }
 
+fun Reminder.lastNotification(before: Date = Date()): Date? {
+    if (before.before(dateTime) || before == dateTime) {
+        return null
+    }
+    if (repetition == null) {
+        return dateTime
+    }
+
+    val calendar = dateTime.toCalendar()
+    val field = repetition!!.unit.toCalendarField()
+    val value = repetition!!.value
+
+    var last = calendar.time
+    // Increment until we are at or after 'before'
+    while (true) {
+        calendar.add(field, value)
+        if (calendar.time.after(before) || calendar.time == before) {
+            break
+        }
+        last = calendar.time
+    }
+
+    return last
+}
+
 fun Reminder.nextNotification(from: Date = Date()): Date? {
     if (from.before(dateTime)) {
         return dateTime
@@ -367,12 +388,19 @@ fun Reminder.nextNotification(from: Date = Date()): Date? {
     if (repetition == null) {
         return null
     }
-    val timeDifferenceMillis: Long = from.time - dateTime.time
-    val intervalsPassed = timeDifferenceMillis / repetition!!.toMillis()
-    val unitsUntilNext = ((repetition!!.value) * (intervalsPassed + 1)).toInt()
-    val reminderStart = dateTime.toCalendar()
-    reminderStart.add(repetition!!.unit.toCalendarField(), unitsUntilNext)
-    return reminderStart.time
+    val calendar = dateTime.toCalendar()
+    val field = repetition!!.unit.toCalendarField()
+    val value = repetition!!.value
+
+    // If from is exactly at dateTime, we want the next one
+    while (true) {
+        calendar.add(field, value)
+        if (calendar.time.after(from)) {
+            break
+        }
+    }
+
+    return calendar.time
 }
 
 fun Reminder.nextRepetition(from: Date = Date()): Date? {
@@ -398,7 +426,16 @@ fun Collection<Reminder>.hasAnyUpcomingNotifications(): Boolean {
 }
 
 fun Collection<Reminder>.findNextNotificationDate(): Date? {
-    return mapNotNull { it.nextNotification() }.minByOrNull { it }
+    return mapNotNull { it.nextNotification() }.minOrNull()
+}
+
+fun Collection<Reminder>.findLastNotificationDate(before: Date = Date()): Date? {
+    return mapNotNull { it.lastNotification(before) }.maxOrNull()
+}
+
+fun Collection<Reminder>.findLastNotified(before: Date = Date()): Reminder? {
+    return filter { it.lastNotification(before) != null }
+        .maxByOrNull { it.lastNotification(before)!! }
 }
 
 fun Date.toCalendar() = Calendar.getInstance().apply { timeInMillis = this@toCalendar.time }

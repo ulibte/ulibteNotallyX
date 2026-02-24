@@ -59,7 +59,8 @@ class ModelExtensionsTest {
                 {
                   "id": 0,
                   "dateTime": 1742822940000,
-                  "repetition": "{\"value\":1,\"unit\":\"DAYS\"}"
+                  "repetition": "{\"value\":1,\"unit\":\"DAYS\"}",
+                  "isNotificationVisible": false
                 }
               ],
               "viewMode": "READ_ONLY"
@@ -125,6 +126,7 @@ class ModelExtensionsTest {
             {
               "reminders": [{
                 "dateTime": 1743253506957,
+                "isNotificationVisible": false,
                 "id": 1,
                 "repetition": {
                   "unit": "WEEKS",

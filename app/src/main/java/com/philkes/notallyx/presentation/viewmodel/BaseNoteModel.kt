@@ -152,7 +152,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
     fun startObserving() {
         NotallyDatabase.getDatabase(app).observeForever(::init)
         folder.observeForever { newFolder ->
-            searchResults!!.fetch(keyword, newFolder, currentLabel)
+            searchResults!!.fetch(keyword, newFolder, currentLabel, debounce = false)
         }
     }
 

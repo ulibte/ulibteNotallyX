@@ -4,8 +4,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.philkes.notallyx.R
 import com.philkes.notallyx.data.dao.NoteReminder
 import com.philkes.notallyx.data.model.findNextNotificationDate
-import com.philkes.notallyx.data.model.toText
 import com.philkes.notallyx.databinding.RecyclerNoteReminderBinding
+import com.philkes.notallyx.presentation.format
 
 class NoteReminderVH(
     private val binding: RecyclerNoteReminderBinding,
@@ -20,7 +20,7 @@ class NoteReminderVH(
             val nextNotificationDate = value.reminders.findNextNotificationDate()
             NextNotification.text =
                 nextNotificationDate?.let {
-                    "${context.getText(R.string.next)}: ${nextNotificationDate.toText()}"
+                    "${context.getText(R.string.next)}: ${nextNotificationDate.format()}"
                 } ?: context.getString(R.string.elapsed)
             Reminders.text = value.reminders.size.toString()
             OpenNote.setOnClickListener { listener.openNote(value) }

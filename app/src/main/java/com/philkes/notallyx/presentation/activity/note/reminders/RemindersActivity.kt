@@ -32,6 +32,7 @@ import com.philkes.notallyx.presentation.activity.LockedActivity
 import com.philkes.notallyx.presentation.add
 import com.philkes.notallyx.presentation.checkAlarmPermission
 import com.philkes.notallyx.presentation.checkNotificationPermission
+import com.philkes.notallyx.presentation.format
 import com.philkes.notallyx.presentation.initListView
 import com.philkes.notallyx.presentation.setCancelButton
 import com.philkes.notallyx.presentation.showAndFocus
@@ -179,7 +180,7 @@ class RemindersActivity : LockedActivity<ActivityRemindersBinding>(), ReminderLi
             alsoCheckAlarmPermission = true,
             alarmPermissionResultLauncher = alarmPermissionActivityResultLauncher,
         ) {
-            DatePickerFragment(calendar?.time ?: reminder?.dateTime) { _, year, month, day ->
+            DatePickerFragment(calendar?.time ?: reminder?.dateTime) { year, month, day ->
                     val usedCalendar = calendar ?: reminder?.dateTime?.toCalendar() ?: now()
                     usedCalendar.set(year, month, day)
                     showTimePickerDialog(reminder, usedCalendar)
@@ -360,7 +361,7 @@ class RemindersActivity : LockedActivity<ActivityRemindersBinding>(), ReminderLi
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.delete_reminder)
             .setMessage(
-                "${reminder.dateTime.toText()}\n${reminder.repetition?.toText(this) ?: getString(R.string.reminder_no_repetition)}"
+                "${reminder.dateTime.format()}\n${reminder.repetition?.toText(this) ?: getString(R.string.reminder_no_repetition)}"
             )
             .setPositiveButton(R.string.delete) { _, _ ->
                 lifecycleScope.launch { model.removeReminder(reminder) }

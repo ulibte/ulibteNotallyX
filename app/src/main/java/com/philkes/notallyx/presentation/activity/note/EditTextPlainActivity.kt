@@ -2,17 +2,24 @@ package com.philkes.notallyx.presentation.activity.note
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.Intent.ACTION_CREATE_DOCUMENT
+import android.content.Intent.CATEGORY_OPENABLE
+import android.content.Intent.EXTRA_TITLE
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.philkes.notallyx.R
 import com.philkes.notallyx.data.model.NoteViewMode
 import com.philkes.notallyx.data.model.Type
+import com.philkes.notallyx.presentation.activity.note.EditActivity.Companion.EXTRA_SELECTED_BASE_NOTE
 import com.philkes.notallyx.presentation.add
 import com.philkes.notallyx.presentation.addIconButton
 import com.philkes.notallyx.presentation.setCancelButton
@@ -24,6 +31,7 @@ import com.philkes.notallyx.utils.findAllOccurrences
 import com.philkes.notallyx.utils.getFileName
 import com.philkes.notallyx.utils.mergeSkipFirst
 import com.philkes.notallyx.utils.observeSkipFirst
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,6 +44,7 @@ import kotlinx.coroutines.withContext
 class EditTextPlainActivity : EditActivity(Type.NOTE) {
 
     private var searchResultIndices: List<Pair<Int, Int>>? = null
+    private lateinit var exportFileActivityResultLauncher: ActivityResultLauncher<Intent>
     private var originalFileUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +52,17 @@ class EditTextPlainActivity : EditActivity(Type.NOTE) {
         if (intent.action == Intent.ACTION_VIEW && intent.data != null) {
             originalFileUri = intent.data
         }
+        setupActivityResultLaunchers()
         super.onCreate(savedInstanceState)
+    }
+
+    private fun setupActivityResultLaunchers() {
+        exportFileActivityResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    result.data?.data?.let { uri -> saveToUri(uri) }
+                }
+            }
     }
 
     override suspend fun checkSave() {}
@@ -182,10 +201,19 @@ class EditTextPlainActivity : EditActivity(Type.NOTE) {
         }
         binding.BottomAppBarRight.apply {
             removeAllViews()
-            if (originalFileUri != null) {
-                addIconButton(R.string.save_to_device, R.drawable.save, marginStart = 10) {
-                    saveToOriginalFile()
-                }
+            addIconButton(R.string.save_to_device, R.drawable.save, marginStart = 10) {
+                val intent =
+                    Intent(ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(CATEGORY_OPENABLE)
+                        this.type = "text/plain"
+                        originalFileUri?.let { uri ->
+                            val fileName = this@EditTextPlainActivity.getFileName(uri)
+                            if (fileName != null) {
+                                this.putExtra(EXTRA_TITLE, fileName)
+                            }
+                        }
+                    }
+                exportFileActivityResultLauncher.launch(intent)
             }
         }
         setBottomAppBarColor(colorInt)
@@ -199,24 +227,22 @@ class EditTextPlainActivity : EditActivity(Type.NOTE) {
             }
     }
 
-    /** Saves the current content back to the original txt file */
-    private fun saveToOriginalFile() {
-        originalFileUri?.let { uri ->
-            lifecycleScope.launch {
-                try {
-                    withContext(Dispatchers.IO) {
-                        contentResolver.openOutputStream(uri)?.use { outputStream ->
-                            outputStream.write(notallyModel.body.toString().toByteArray())
-                        }
-                    }
-                    showToast(R.string.saved_to_device)
-                } catch (e: Exception) {
-                    MaterialAlertDialogBuilder(this@EditTextPlainActivity)
-                        .setTitle(R.string.something_went_wrong)
-                        .setMessage(e.message)
-                        .setCancelButton()
-                        .show()
+    private fun saveToUri(uri: Uri) {
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    val outputStream =
+                        contentResolver.openOutputStream(uri)
+                            ?: throw IOException("Failed to open output stream for URI: $uri")
+                    outputStream.use { it.write(notallyModel.body.toString().toByteArray()) }
                 }
+                showToast(R.string.saved_to_device)
+            } catch (e: Exception) {
+                MaterialAlertDialogBuilder(this@EditTextPlainActivity)
+                    .setTitle(R.string.something_went_wrong)
+                    .setMessage(e.message)
+                    .setCancelButton()
+                    .show()
             }
         }
     }
