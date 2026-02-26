@@ -285,7 +285,20 @@ class MainActivity : LockedActivity<ActivityMainBinding>() {
             add(3, R.id.Reminders, CATEGORY_SYSTEM + 3, R.string.reminders)
                 .setCheckable(true)
                 .setIcon(R.drawable.notifications)
-            add(3, R.id.Settings, CATEGORY_SYSTEM + 4, R.string.settings)
+                .setOnMenuItemClickListener {
+                    if (baseModel.detailedReminder.value == true) {
+                        navController.navigate(R.id.DetailedReminders)
+                    } else {
+                        navController.navigate(R.id.Reminders)
+                    }
+                    binding.DrawerLayout.closeDrawers()
+                    true
+                }
+            add(3, R.id.DetailedReminders, CATEGORY_SYSTEM + 4, R.string.reminders)
+                .setCheckable(true)
+                .setIcon(R.drawable.notifications)
+                .isVisible = false
+            add(3, R.id.Settings, CATEGORY_SYSTEM + 5, R.string.settings)
                 .setCheckable(true)
                 .setIcon(R.drawable.settings)
         }

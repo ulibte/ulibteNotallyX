@@ -117,6 +117,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
     var baseNotes: Content? = null
     var deletedNotes: Content? = null
     var archivedNotes: Content? = null
+    var reminderNotes: Content? = null
 
     val folder = NotNullLiveData(Folder.NOTES)
 
@@ -148,6 +149,8 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
 
     internal var showRefreshBackupsFolderAfterThemeChange = false
     private var labelsHiddenObserver: Observer<Set<String>>? = null
+
+    val detailedReminder = MutableLiveData(false)
 
     init {
         NotallyDatabase.getDatabase(app).observeForever(::init)
@@ -188,6 +191,12 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
             archivedNotes = Content(baseNoteDao.getFrom(Folder.ARCHIVED), ::transform)
         } else {
             archivedNotes!!.setObserver(baseNoteDao.getFrom(Folder.ARCHIVED))
+        }
+
+        if (reminderNotes == null) {
+            reminderNotes = Content(baseNoteDao.getAllBaseNotesWithReminders(), ::transform)
+        } else {
+            reminderNotes!!.setObserver(baseNoteDao.getAllBaseNotesWithReminders())
         }
 
         if (searchResults == null) {

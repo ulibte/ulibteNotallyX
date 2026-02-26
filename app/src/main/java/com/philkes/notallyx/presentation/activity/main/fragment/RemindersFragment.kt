@@ -3,6 +3,9 @@ package com.philkes.notallyx.presentation.activity.main.fragment
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -17,6 +20,7 @@ import com.philkes.notallyx.presentation.initListView
 import com.philkes.notallyx.presentation.view.main.reminder.NoteReminderAdapter
 import com.philkes.notallyx.presentation.view.main.reminder.NoteReminderListener
 import com.philkes.notallyx.presentation.viewmodel.BaseNoteModel
+import com.philkes.notallyx.utils.RemindersOptionsDelegate
 import com.philkes.notallyx.utils.getOpenNoteIntent
 
 class RemindersFragment : Fragment(), NoteReminderListener {
@@ -24,6 +28,7 @@ class RemindersFragment : Fragment(), NoteReminderListener {
     private var reminderAdapter: NoteReminderAdapter? = null
     private var binding: FragmentRemindersBinding? = null
     private lateinit var allReminders: List<NoteReminder>
+    private lateinit var optionsDelegate: RemindersOptionsDelegate
 
     private val model: BaseNoteModel by activityViewModels()
 
@@ -47,6 +52,8 @@ class RemindersFragment : Fragment(), NoteReminderListener {
             allReminders = reminders.sortedBy { it.title }
             updateList()
         }
+        optionsDelegate = RemindersOptionsDelegate(model, this)
+        optionsDelegate.onViewCreated(view, savedInstanceState)
     }
 
     override fun onCreateView(
@@ -80,5 +87,17 @@ class RemindersFragment : Fragment(), NoteReminderListener {
 
     override fun openNote(reminder: NoteReminder) {
         startActivity(requireContext().getOpenNoteIntent(reminder.id, reminder.type))
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        optionsDelegate.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if (optionsDelegate.onOptionsItemSelected(item)) {
+            true
+        } else {
+            super.onOptionsItemSelected(item)
+        }
     }
 }
