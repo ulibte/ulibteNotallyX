@@ -161,6 +161,8 @@ class NotallyXPreferences private constructor(private val context: Context) {
      */
     val dataSchemaId = IntPreference("dataSchemaId", preferences, 0, 0, Integer.MAX_VALUE)
 
+    val detailedReminder = BooleanPreference("detailedReminder", preferences, false)
+
     fun setDataSchemaId(value: Int) {
         preferences.edit(true) { putInt(dataSchemaId.key, value) }
         dataSchemaId.refresh()

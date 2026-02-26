@@ -25,7 +25,7 @@ class RemindersOptionsDelegate(val model: BaseNoteModel, val fragment: Fragment)
             R.id.show_more_details -> {
                 val isChecked = !item.isChecked
                 item.isChecked = isChecked
-                model.detailedReminder.value = isChecked
+                model.detailedReminder.save(isChecked)
                 true
             }
             else -> false
