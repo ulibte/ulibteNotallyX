@@ -17,10 +17,11 @@ import com.philkes.notallyx.data.model.hasAnyUpcomingNotifications
 import com.philkes.notallyx.databinding.FragmentRemindersBinding
 import com.philkes.notallyx.presentation.activity.note.reminders.RemindersActivity
 import com.philkes.notallyx.presentation.initListView
+import com.philkes.notallyx.presentation.view.main.reminder.FilterOptions
 import com.philkes.notallyx.presentation.view.main.reminder.NoteReminderAdapter
 import com.philkes.notallyx.presentation.view.main.reminder.NoteReminderListener
+import com.philkes.notallyx.presentation.view.main.reminder.RemindersOptions
 import com.philkes.notallyx.presentation.viewmodel.BaseNoteModel
-import com.philkes.notallyx.utils.RemindersOptionsDelegate
 import com.philkes.notallyx.utils.getOpenNoteIntent
 
 class RemindersFragment : Fragment(), NoteReminderListener {
@@ -28,7 +29,7 @@ class RemindersFragment : Fragment(), NoteReminderListener {
     private var reminderAdapter: NoteReminderAdapter? = null
     private var binding: FragmentRemindersBinding? = null
     private lateinit var allReminders: List<NoteReminder>
-    private lateinit var optionsDelegate: RemindersOptionsDelegate
+    private lateinit var optionsDelegate: RemindersOptions
 
     private val model: BaseNoteModel by activityViewModels()
 
@@ -46,13 +47,13 @@ class RemindersFragment : Fragment(), NoteReminderListener {
             adapter = reminderAdapter
             binding?.ImageView?.setImageResource(R.drawable.notifications)
         }
-        binding?.ChipGroup?.setOnCheckedStateChangeListener { _, _ -> updateList() }
 
         model.reminders.observe(viewLifecycleOwner) { reminders ->
             allReminders = reminders.sortedBy { it.title }
-            updateList()
+            reminderAdapter?.submitList(allReminders)
+            binding?.ImageView?.isVisible = allReminders.isEmpty()
         }
-        optionsDelegate = RemindersOptionsDelegate(model, this)
+        optionsDelegate = RemindersOptions(model, this, ::applyFilter)
         optionsDelegate.onViewCreated(view, savedInstanceState)
     }
 
@@ -66,12 +67,18 @@ class RemindersFragment : Fragment(), NoteReminderListener {
         return binding?.root
     }
 
-    private fun updateList() {
+    private fun applyFilter(filterOptions: FilterOptions) {
         val list =
-            when (binding?.ChipGroup?.checkedChipId) {
-                R.id.Upcoming -> allReminders.filter { it.reminders.hasAnyUpcomingNotifications() }
-                R.id.Past -> allReminders.filter { !it.reminders.hasAnyUpcomingNotifications() }
-                else -> allReminders
+            when (filterOptions) {
+                FilterOptions.ALL -> {
+                    allReminders
+                }
+                FilterOptions.UPCOMING -> {
+                    allReminders.filter { it.reminders.hasAnyUpcomingNotifications() }
+                }
+                FilterOptions.ELAPSED -> {
+                    allReminders.filter { !it.reminders.hasAnyUpcomingNotifications() }
+                }
             }
         reminderAdapter?.submitList(list)
         binding?.ImageView?.isVisible = list.isEmpty()

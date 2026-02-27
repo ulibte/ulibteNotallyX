@@ -12,6 +12,10 @@
                 android:title="@string/show_more_details"
                 android:checkable="true"
                 />
+            <item
+                android:id="@+id/reminder_filter"
+                android:title="@string/filter"
+                />
         </menu>
     </item>
 </menu>

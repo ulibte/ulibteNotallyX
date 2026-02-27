@@ -18,7 +18,6 @@
       android:id="@+id/MainListView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:layout_below="@id/ChipGroup"
       android:clipToPadding="false"
       android:paddingStart="4dp"
       android:paddingTop="8dp"
@@ -29,37 +28,5 @@
       app:fastScrollHorizontalThumbDrawable="@drawable/scroll_thumb"
       app:fastScrollVerticalThumbDrawable="@drawable/scroll_thumb"
       />
-
-    <com.google.android.material.chip.ChipGroup
-      android:id="@+id/ChipGroup"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:background="?attr/colorSurface"
-      app:selectionRequired="true"
-      app:singleSelection="true">
-
-        <com.google.android.material.chip.Chip
-          android:id="@+id/All"
-          style="@style/FilterChip"
-          android:checked="true"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="@string/all" />
-
-        <com.google.android.material.chip.Chip
-          android:id="@+id/Upcoming"
-          style="@style/FilterChip"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="@string/upcoming" />
-
-        <com.google.android.material.chip.Chip
-          android:id="@+id/Past"
-          style="@style/FilterChip"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="@string/elapsed" />
-
-    </com.google.android.material.chip.ChipGroup>
 
 </RelativeLayout>
