@@ -98,6 +98,7 @@ import com.philkes.notallyx.utils.findWebUrls
 import com.philkes.notallyx.utils.getFileName
 import com.philkes.notallyx.utils.getMimeType
 import com.philkes.notallyx.utils.getUriForFile
+import com.philkes.notallyx.utils.isInLandscapeMode
 import com.philkes.notallyx.utils.log
 import com.philkes.notallyx.utils.mergeSkipFirst
 import com.philkes.notallyx.utils.observeSkipFirst
@@ -132,6 +133,8 @@ abstract class EditActivity(private val type: Type) :
     internal lateinit var changeHistory: ChangeHistory
     protected var undo: View? = null
     protected var redo: View? = null
+    protected var jumpToTop: View? = null
+    protected var jumpToBottom: View? = null
 
     protected var colorInt: Int = -1
     protected var inputMethodManager: InputMethodManager? = null
@@ -453,6 +456,11 @@ abstract class EditActivity(private val type: Type) :
             add(R.string.search, R.drawable.search, MenuItem.SHOW_AS_ACTION_ALWAYS) {
                 startSearch()
             }
+            if (notallyModel.folder == Folder.NOTES) {
+                add(R.string.reminders, R.drawable.notifications, MenuItem.SHOW_AS_ACTION_ALWAYS) {
+                    changeReminders()
+                }
+            }
             pinMenuItem =
                 add(R.string.pin, R.drawable.pin, MenuItem.SHOW_AS_ACTION_ALWAYS) { pin() }
             bindPinned()
@@ -546,6 +554,22 @@ abstract class EditActivity(private val type: Type) :
 
     protected fun isInSearchMode(): Boolean = binding.EnterSearchKeyword.visibility == VISIBLE
 
+    protected fun updateJumpButtonsVisibility(manualSize: Int? = null) {
+        jumpToTop?.post {
+            val show =
+                when (notallyModel.type) {
+                    Type.NOTE ->
+                        (manualSize ?: binding.EnterBody.lineCount) >
+                            (if (isInLandscapeMode) 30 else 75)
+                    Type.LIST ->
+                        (manualSize ?: notallyModel.items.size) >
+                            (if (isInLandscapeMode) 15 else 25)
+                }
+            jumpToTop?.isVisible = show
+            jumpToBottom?.isVisible = show
+        }
+    }
+
     protected fun endSearch() {
         binding.EnterSearchKeyword.apply {
             visibility = GONE
@@ -570,6 +594,14 @@ abstract class EditActivity(private val type: Type) :
         }
         binding.BottomAppBarCenter.apply {
             removeAllViews()
+            jumpToTop =
+                addIconButton(
+                    R.string.jump_to_top,
+                    R.drawable.vertical_align_top,
+                    marginStart = 0,
+                ) {
+                    binding.ScrollView.apply { post { fullScroll(View.FOCUS_UP) } }
+                }
             undo =
                 addIconButton(
                         R.string.undo,
@@ -613,6 +645,26 @@ abstract class EditActivity(private val type: Type) :
                         }
                     }
                     .apply { isEnabled = changeHistory.canRedo.value }
+            jumpToBottom =
+                addIconButton(
+                    R.string.jump_to_bottom,
+                    R.drawable.vertical_align_bottom,
+                    marginStart = 2,
+                ) {
+                    binding.ScrollView.apply {
+                        post {
+                            val lastChild: View? = binding.ScrollView.getChildAt(0)
+                            if (lastChild != null) {
+                                val bottom: Int =
+                                    lastChild.bottom + binding.ScrollView.paddingBottom
+                                binding.ScrollView.smoothScrollTo(0, bottom)
+                            } else {
+                                fullScroll(View.FOCUS_DOWN)
+                            }
+                        }
+                    }
+                }
+            updateJumpButtonsVisibility()
         }
         binding.BottomAppBarRight.apply {
             removeAllViews()
@@ -977,9 +1029,18 @@ abstract class EditActivity(private val type: Type) :
     }
 
     override fun changeReminders() {
-        val intent = Intent(this, RemindersActivity::class.java)
-        intent.putExtra(RemindersActivity.NOTE_ID, notallyModel.id)
-        startActivity(intent)
+        lifecycleScope.launch {
+            val noteId =
+                if (notallyModel.id != 0L) {
+                    notallyModel.id
+                } else {
+                    notallyModel.id = saveNote(false)
+                    notallyModel.id
+                }
+            val intent = Intent(this@EditActivity, RemindersActivity::class.java)
+            intent.putExtra(RemindersActivity.NOTE_ID, noteId)
+            startActivity(intent)
+        }
     }
 
     override fun changeLabels() {

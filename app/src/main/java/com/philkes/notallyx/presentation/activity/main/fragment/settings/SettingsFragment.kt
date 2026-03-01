@@ -24,17 +24,19 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.work.WorkManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
 import com.philkes.notallyx.NotallyXApplication
 import com.philkes.notallyx.R
+import com.philkes.notallyx.cancelAutoRemoveOldDeletedNotes
 import com.philkes.notallyx.data.imports.FOLDER_OR_FILE_MIMETYPE
 import com.philkes.notallyx.data.imports.ImportSource
 import com.philkes.notallyx.data.imports.txt.APPLICATION_TEXT_MIME_TYPES
-import com.philkes.notallyx.data.model.toText
 import com.philkes.notallyx.databinding.DialogTextInputBinding
 import com.philkes.notallyx.databinding.FragmentSettingsBinding
 import com.philkes.notallyx.presentation.activity.main.MainActivity
+import com.philkes.notallyx.presentation.format
 import com.philkes.notallyx.presentation.setCancelButton
 import com.philkes.notallyx.presentation.setEnabledSecureFlag
 import com.philkes.notallyx.presentation.setupImportProgressDialog
@@ -51,6 +53,7 @@ import com.philkes.notallyx.presentation.viewmodel.preference.PeriodicBackup
 import com.philkes.notallyx.presentation.viewmodel.preference.PeriodicBackup.Companion.BACKUP_MAX_MIN
 import com.philkes.notallyx.presentation.viewmodel.preference.PeriodicBackup.Companion.BACKUP_PERIOD_DAYS_MIN
 import com.philkes.notallyx.presentation.viewmodel.preference.PeriodicBackupsPreference
+import com.philkes.notallyx.scheduleAutoRemoveOldDeletedNotes
 import com.philkes.notallyx.utils.MIME_TYPE_JSON
 import com.philkes.notallyx.utils.MIME_TYPE_ZIP
 import com.philkes.notallyx.utils.backup.exportPreferences
@@ -337,6 +340,23 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        autoRemoveDeletedNotesAfterDays.observe(viewLifecycleOwner) { value ->
+            binding.AutoEmptyBin.setupAutoEmptyBin(
+                autoRemoveDeletedNotesAfterDays,
+                requireContext(),
+            ) { newValue ->
+                model.savePreference(autoRemoveDeletedNotesAfterDays, newValue)
+                val workManager = WorkManager.getInstance(requireContext())
+                if (newValue > 0) {
+                    workManager.scheduleAutoRemoveOldDeletedNotes(
+                        requireContext() as ContextWrapper
+                    )
+                } else {
+                    workManager.cancelAutoRemoveOldDeletedNotes()
+                }
+            }
+        }
+
         binding.MaxLabels.setup(maxLabels, requireContext()) { newValue ->
             model.savePreference(maxLabels, newValue)
         }
@@ -580,7 +600,7 @@ class SettingsFragment : Fragment() {
                 if (time != -1L) {
                     isVisible = true
                     text =
-                        "${requireContext().getString(R.string.auto_backup_last)}: ${Date(time).toText()}"
+                        "${requireContext().getString(R.string.auto_backup_last)}: ${Date(time).format()}"
                 } else isVisible = false
             }
         }

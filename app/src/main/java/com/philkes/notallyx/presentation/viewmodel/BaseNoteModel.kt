@@ -110,13 +110,13 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
 
     lateinit var selectedExportMimeType: ExportMimeType
 
-    lateinit var labels: LiveData<List<String>>
-    lateinit var reminders: LiveData<List<NoteReminder>>
-    private var allNotes: LiveData<List<BaseNote>>? = null
+    var labels: LiveData<List<String>> = NotNullLiveData(mutableListOf())
+    var reminders: LiveData<List<NoteReminder>> = NotNullLiveData(mutableListOf())
+    private var allNotes: LiveData<List<BaseNote>>? = NotNullLiveData(mutableListOf())
     private var allNotesObserver: Observer<List<BaseNote>>? = null
-    var baseNotes: Content? = null
-    var deletedNotes: Content? = null
-    var archivedNotes: Content? = null
+    var baseNotes: Content? = Content(MutableLiveData(), ::transform)
+    var deletedNotes: Content? = Content(MutableLiveData(), ::transform)
+    var archivedNotes: Content? = Content(MutableLiveData(), ::transform)
     var reminderNotes: Content? = null
 
     val folder = NotNullLiveData(Folder.NOTES)
@@ -150,10 +150,10 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
     internal var showRefreshBackupsFolderAfterThemeChange = false
     private var labelsHiddenObserver: Observer<Set<String>>? = null
 
-    init {
+    fun startObserving() {
         NotallyDatabase.getDatabase(app).observeForever(::init)
         folder.observeForever { newFolder ->
-            searchResults!!.fetch(keyword, newFolder, currentLabel)
+            searchResults!!.fetch(keyword, newFolder, currentLabel, debounce = false)
         }
     }
 
@@ -167,7 +167,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
         //        colors = baseNoteDao.getAllColorsAsync()
         reminders = baseNoteDao.getAllRemindersAsync()
 
-        allNotes?.removeObserver(allNotesObserver!!)
+        allNotesObserver?.let { allNotes?.removeObserver(it) }
         allNotesObserver = Observer { list -> Cache.list = list }
         allNotes = baseNoteDao.getAllAsync()
         allNotes!!.observeForever(allNotesObserver!!)
@@ -638,7 +638,11 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
         viewModelScope.launch(
             Dispatchers.IO
         ) { // Only reminders of notes in NOTES folder are active
-            baseNoteDao.move(ids, folder)
+            if (folder == Folder.DELETED) {
+                baseNoteDao.move(ids, folder, System.currentTimeMillis())
+            } else {
+                baseNoteDao.move(ids, folder)
+            }
             val notes = baseNoteDao.getByIds(ids).toNoteIdReminders()
             // Only reminders of notes in NOTES folder are active
             when (folder) {
@@ -904,7 +908,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
                     askForUriPermissions(backupFolderUri)
                 }
                 .show()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             showRefreshBackupsFolderAfterThemeChange = false
             disableBackups()
         }

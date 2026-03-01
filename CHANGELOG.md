@@ -1,5 +1,29 @@
 # Changelog
 
+## [v7.8.1](https://github.com/Crustack/NotallyX/tree/v7.8.1) (2026-02-21)
+
+[Full Changelog](https://github.com/Crustack/NotallyX/compare/v7.8.0...v7.8.1)
+
+### Fixed Bugs
+
+- Video can't be played [\#849](https://github.com/Crustack/NotallyX/issues/849)
+- Inability to edit external txt files [\#847](https://github.com/Crustack/NotallyX/issues/847)
+
+## [v7.8.0](https://github.com/Crustack/NotallyX/tree/v7.8.0) (2026-02-20)
+
+[Full Changelog](https://github.com/Crustack/NotallyX/compare/v7.7.0...v7.8.0)
+
+### Added Features
+
+- Auto delete deleted notes [\#393](https://github.com/Crustack/NotallyX/issues/393)
+
+### Fixed Bugs
+
+- Bounty offered: Crash and inaccessible files after attempting to open large .txt with NotallyX [\#837](https://github.com/Crustack/NotallyX/issues/837)
+- Error on clicking Added audio files [\#830](https://github.com/Crustack/NotallyX/issues/830)
+- Search in the note through the input of symbols [\#822](https://github.com/Crustack/NotallyX/issues/822)
+- Broken dynamic colors [\#818](https://github.com/Crustack/NotallyX/issues/818)
+
 ## [v7.7.0](https://github.com/Crustack/NotallyX/tree/v7.7.0) (2026-01-30)
 
 [Full Changelog](https://github.com/Crustack/NotallyX/compare/v7.6.1...v7.7.0)

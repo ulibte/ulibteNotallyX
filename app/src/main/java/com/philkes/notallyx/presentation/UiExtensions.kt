@@ -598,7 +598,7 @@ private fun formatTimestamp(timestamp: Long, dateFormat: DateFormat): String {
     return Date(timestamp).format(dateFormat)
 }
 
-fun Date.format(dateFormat: DateFormat): String {
+fun Date.format(dateFormat: DateFormat = DateFormat.TIMESTAMP_SHORT): String {
     return when (dateFormat) {
         DateFormat.NONE -> ""
         DateFormat.RELATIVE -> PrettyTime().format(this)

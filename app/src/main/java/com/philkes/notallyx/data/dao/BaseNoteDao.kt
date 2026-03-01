@@ -107,6 +107,8 @@ interface BaseNoteDao {
 
     @Query("SELECT COUNT(*) FROM BaseNote") fun count(): Int
 
+    @Query("DELETE FROM BaseNote") suspend fun deleteAll()
+
     @Query("DELETE FROM BaseNote WHERE id = :id") suspend fun delete(id: Long)
 
     @Query("DELETE FROM BaseNote WHERE id IN (:ids)") suspend fun delete(ids: LongArray)
@@ -134,6 +136,15 @@ interface BaseNoteDao {
 
     @Query("SELECT images FROM BaseNote WHERE id = :id") fun getImages(id: Long): String
 
+    @Query("SELECT images FROM BaseNote WHERE id IN (:ids)")
+    fun getImages(ids: LongArray): List<String>
+
+    @Query("SELECT files FROM BaseNote WHERE id IN (:ids)")
+    fun getFiles(ids: LongArray): List<String>
+
+    @Query("SELECT audios FROM BaseNote WHERE id IN (:ids)")
+    fun getAudios(ids: LongArray): List<String>
+
     @Query("SELECT images FROM BaseNote") fun getAllImages(): List<String>
 
     @Query("SELECT files FROM BaseNote") fun getAllFiles(): List<String>
@@ -156,6 +167,9 @@ interface BaseNoteDao {
     @Query("SELECT id FROM BaseNote WHERE folder = 'DELETED'")
     suspend fun getDeletedNoteIds(): LongArray
 
+    @Query("SELECT id FROM BaseNote WHERE folder = 'DELETED' AND modifiedTimestamp < :before")
+    suspend fun getDeletedNoteIdsOlderThan(before: Long): LongArray
+
     @Query("SELECT images FROM BaseNote WHERE folder = 'DELETED'")
     suspend fun getDeletedNoteImages(): List<String>
 
@@ -167,6 +181,11 @@ interface BaseNoteDao {
 
     @Query("UPDATE BaseNote SET folder = :folder WHERE id IN (:ids)")
     suspend fun move(ids: LongArray, folder: Folder)
+
+    @Query(
+        "UPDATE BaseNote SET folder = :folder, modifiedTimestamp = :timestamp WHERE id IN (:ids)"
+    )
+    suspend fun move(ids: LongArray, folder: Folder, timestamp: Long)
 
     @Query("SELECT DISTINCT color FROM BaseNote") fun getAllColorsAsync(): LiveData<List<String>>
 

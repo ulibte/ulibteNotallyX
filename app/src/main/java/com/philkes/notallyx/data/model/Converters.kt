@@ -1,6 +1,7 @@
 package com.philkes.notallyx.data.model
 
 import androidx.room.TypeConverter
+import java.util.Calendar
 import java.util.Date
 import org.json.JSONArray
 import org.json.JSONException
@@ -147,6 +148,7 @@ object Converters {
                     put("id", reminder.id) // Store date as long timestamp
                     put("dateTime", reminder.dateTime.time) // Store date as long timestamp
                     put("repetition", reminder.repetition?.let { repetitionToJsonObject(it) })
+                    put("isNotificationVisible", reminder.isNotificationVisible)
                 }
             }
         return JSONArray(objects)
@@ -159,7 +161,8 @@ object Converters {
             val id = jsonObject.getLong("id")
             val dateTime = Date(jsonObject.getLong("dateTime"))
             val repetition = jsonObject.getSafeString("repetition")?.let { jsonToRepetition(it) }
-            Reminder(id, dateTime, repetition)
+            val isNotificationVisible = jsonObject.getSafeBoolean("isNotificationVisible")
+            Reminder(id, dateTime, repetition, isNotificationVisible)
         }
     }
 
@@ -172,18 +175,32 @@ object Converters {
         val jsonObject = JSONObject()
         jsonObject.put("value", repetition.value)
         jsonObject.put("unit", repetition.unit.name) // Store the TimeUnit as a string
+        repetition.occurrence?.let { jsonObject.put("occurrence", it) }
+        repetition.dayOfWeek?.let { jsonObject.put("dayOfWeek", it) }
         return jsonObject
     }
 
     @TypeConverter
     fun jsonToRepetition(json: String): Repetition {
         val jsonObject = JSONObject(json)
-        val value = jsonObject.getInt("value")
-        val unit =
-            RepetitionTimeUnit.valueOf(
-                jsonObject.getString("unit")
-            ) // Convert string back to TimeUnit
-        return Repetition(value, unit)
+        val value = jsonObject.getInt("value").coerceAtLeast(1)
+        val unit = RepetitionTimeUnit.valueOf(jsonObject.getString("unit"))
+        val (occurrence, dayOfWeek) = getSafeRepetitionCustomization(jsonObject)
+        return Repetition(value, unit, occurrence, dayOfWeek)
+    }
+
+    private fun getSafeRepetitionCustomization(jsonObject: JSONObject): Pair<Int?, Int?> {
+        if (jsonObject.has("occurrence") && jsonObject.has("dayOfWeek")) {
+            val occurrence = jsonObject.getInt("occurrence")
+            val dayOfWeek = jsonObject.getInt("dayOfWeek")
+            if (
+                occurrence in setOf(-1, 1, 2, 3, 4) &&
+                    dayOfWeek in Calendar.SUNDAY..Calendar.SATURDAY
+            ) {
+                return Pair(occurrence, dayOfWeek)
+            }
+        }
+        return Pair(null, null)
     }
 
     private fun getSafeLocalName(jsonObject: JSONObject): String {

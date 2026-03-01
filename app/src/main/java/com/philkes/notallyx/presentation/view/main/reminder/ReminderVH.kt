@@ -1,10 +1,10 @@
 package com.philkes.notallyx.presentation.view.main.reminder
 
 import androidx.recyclerview.widget.RecyclerView
-import com.philkes.notallyx.R
 import com.philkes.notallyx.data.model.Reminder
-import com.philkes.notallyx.data.model.toText
+import com.philkes.notallyx.data.model.toRepetitionText
 import com.philkes.notallyx.databinding.RecyclerReminderBinding
+import com.philkes.notallyx.presentation.format
 
 class ReminderVH(
     private val binding: RecyclerReminderBinding,
@@ -13,10 +13,8 @@ class ReminderVH(
 
     fun bind(value: Reminder) {
         binding.apply {
-            DateTime.text = value.dateTime.toText()
-            Repetition.text =
-                value.repetition?.toText(itemView.context)
-                    ?: itemView.context.getText(R.string.reminder_no_repetition)
+            DateTime.text = value.dateTime.format()
+            Repetition.text = value.toRepetitionText(itemView.context)
             EditButton.setOnClickListener { listener.edit(value) }
             DeleteButton.setOnClickListener { listener.delete(value) }
         }

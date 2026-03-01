@@ -2,13 +2,20 @@ package com.philkes.notallyx.presentation.activity.note
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.Intent.ACTION_CREATE_DOCUMENT
+import android.content.Intent.CATEGORY_OPENABLE
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.davemorrissey.labs.subscaleview.ImageSource.uri
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.philkes.notallyx.R
 import com.philkes.notallyx.data.model.NoteViewMode
@@ -24,6 +31,7 @@ import com.philkes.notallyx.utils.findAllOccurrences
 import com.philkes.notallyx.utils.getFileName
 import com.philkes.notallyx.utils.mergeSkipFirst
 import com.philkes.notallyx.utils.observeSkipFirst
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,28 +44,44 @@ import kotlinx.coroutines.withContext
 class EditTextPlainActivity : EditActivity(Type.NOTE) {
 
     private var searchResultIndices: List<Pair<Int, Int>>? = null
-    private var originalFileUri: Uri? = null
+    private lateinit var saveAsActivityResultLauncher: ActivityResultLauncher<Intent>
+    private var originalFileUri: MutableLiveData<Uri?> = MutableLiveData(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Store the original URI if this is a txt file being opened
         if (intent.action == Intent.ACTION_VIEW && intent.data != null) {
-            originalFileUri = intent.data
+            originalFileUri.value = intent.data
         }
+        setupActivityResultLaunchers()
         super.onCreate(savedInstanceState)
+    }
+
+    private fun setupActivityResultLaunchers() {
+        saveAsActivityResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    result.data?.data?.let { uri -> saveToUri(uri) }
+                }
+            }
     }
 
     override suspend fun checkSave() {}
 
     override fun configureUI() {
         // Set the file name as the title and make it non-editable
-        originalFileUri?.let { uri ->
-            val fileName = getFileName(uri)
-            if (!fileName.isNullOrEmpty()) {
-                notallyModel.title = fileName
-                binding.EnterTitle.setText(fileName)
-                binding.EnterTitle.isEnabled = false
-            }
-        }
+        originalFileUri.observe(
+            this,
+            Observer { uri ->
+                uri?.let {
+                    val fileName = getFileName(it)
+                    if (!fileName.isNullOrEmpty()) {
+                        notallyModel.title = fileName
+                        binding.EnterTitle.setText(fileName)
+                        binding.EnterTitle.isEnabled = false
+                    }
+                }
+            },
+        )
 
         binding.EnterTitle.setOnNextAction { binding.EnterBody.requestFocus() }
 
@@ -182,10 +206,16 @@ class EditTextPlainActivity : EditActivity(Type.NOTE) {
         }
         binding.BottomAppBarRight.apply {
             removeAllViews()
-            if (originalFileUri != null) {
-                addIconButton(R.string.save_to_device, R.drawable.save, marginStart = 10) {
-                    saveToOriginalFile()
-                }
+            addIconButton(R.string.save, R.drawable.save, marginStart = 10) {
+                originalFileUri.value?.let { uri -> saveToUri(uri) }
+            }
+            addIconButton(R.string.save_to_device, R.drawable.save_as, marginStart = 10) {
+                val intent =
+                    Intent(ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(CATEGORY_OPENABLE)
+                        this.type = "text/*"
+                    }
+                saveAsActivityResultLauncher.launch(intent)
             }
         }
         setBottomAppBarColor(colorInt)
@@ -199,24 +229,23 @@ class EditTextPlainActivity : EditActivity(Type.NOTE) {
             }
     }
 
-    /** Saves the current content back to the original txt file */
-    private fun saveToOriginalFile() {
-        originalFileUri?.let { uri ->
-            lifecycleScope.launch {
-                try {
-                    withContext(Dispatchers.IO) {
-                        contentResolver.openOutputStream(uri)?.use { outputStream ->
-                            outputStream.write(notallyModel.body.toString().toByteArray())
-                        }
-                    }
-                    showToast(R.string.saved_to_device)
-                } catch (e: Exception) {
-                    MaterialAlertDialogBuilder(this@EditTextPlainActivity)
-                        .setTitle(R.string.something_went_wrong)
-                        .setMessage(e.message)
-                        .setCancelButton()
-                        .show()
+    private fun saveToUri(uri: Uri) {
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    val outputStream =
+                        contentResolver.openOutputStream(uri)
+                            ?: throw IOException("Failed to open output stream for URI: $uri")
+                    outputStream.use { it.write(notallyModel.body.toString().toByteArray()) }
                 }
+                originalFileUri.value = uri
+                showToast(R.string.saved_to_device)
+            } catch (e: Exception) {
+                MaterialAlertDialogBuilder(this@EditTextPlainActivity)
+                    .setTitle(R.string.something_went_wrong)
+                    .setMessage(e.message)
+                    .setCancelButton()
+                    .show()
             }
         }
     }

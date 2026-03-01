@@ -32,6 +32,8 @@
     <string name="auto_backups_folder_hint">Folder in which all auto backups will be stored in.\nIf you want to use Cloud-Storage/WebDAV for your backups, please read the docs (click \"%1$s\")</string>
     <string name="auto_backups_folder_rechoose">You need to re-choose your Backups Folder so that NotallyX has permission to write to it.\nYou can also press cancel to skip importing Backups Folder value</string>
     <string name="auto_backups_folder_set">Set up a Backups Folder above first</string>
+    <string name="auto_remove_deleted_notes">Auto remove deleted Notes permanently after</string>
+    <string name="auto_remove_deleted_notes_hint">By enabling this, Notes that were deleted will be permanently removed after X days</string>
     <string name="auto_save_after_idle_time">Auto save note after specified idle time</string>
     <string name="auto_sort_by_checked">Sort checked items to the end</string>
     <string name="back">Back</string>
@@ -106,6 +108,7 @@
     <string name="date_format">Date format</string>
     <string name="date_format_apply_in_note_view">Also apply in Note View</string>
     <string name="date_format_hint">Applies selected date format in Notes Overview</string>
+    <string name="day">Day</string>
     <string name="days">Days</string>
     <string name="delete">Delete</string>
     <string name="delete_all">Delete all</string>
@@ -214,6 +217,8 @@
     <string name="item">Item</string>
     <string name="json_files">JSON Files</string>
     <string name="json_files_help">In order to import your Notes from JSON files (single file or folder), click Import. Every valid JSON file is imported as a separate note, the file’s name becomes the note’s title.</string>
+    <string name="jump_to_bottom">Jump to bottom</string>
+    <string name="jump_to_top">Jump to top</string>
     <string name="label_exists">Label exists</string>
     <string name="label_visibility">Hide/Show the label in the navigation panel</string>
     <string name="labels">Labels</string>
@@ -262,6 +267,8 @@
         <item quantity="one">%1$s Note is too big to save, it was truncated to %2$s characters</item>
         <item quantity="other">%1$s Notes are too big to save, they were truncated to %2$s characters</item>
     </plurals>
+    <string name="of_the_month">%1$s of the month</string>
+    <string name="of_the_month_last">Last %1$s of the month</string>
     <string name="open_link">Open link</string>
     <string name="open_note">Open Note</string>
     <string name="others">Others</string>
