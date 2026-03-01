@@ -52,7 +52,6 @@ import com.philkes.notallyx.presentation.view.misc.NotNullLiveData
 import com.philkes.notallyx.presentation.view.misc.Progress
 import com.philkes.notallyx.presentation.viewmodel.preference.BasePreference
 import com.philkes.notallyx.presentation.viewmodel.preference.BiometricLock
-import com.philkes.notallyx.presentation.viewmodel.preference.BooleanPreference
 import com.philkes.notallyx.presentation.viewmodel.preference.NotallyXPreferences
 import com.philkes.notallyx.presentation.viewmodel.preference.NotallyXPreferences.Companion.EMPTY_PATH
 import com.philkes.notallyx.presentation.viewmodel.preference.NotallyXPreferences.Companion.START_VIEW_DEFAULT
@@ -150,8 +149,6 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
 
     internal var showRefreshBackupsFolderAfterThemeChange = false
     private var labelsHiddenObserver: Observer<Set<String>>? = null
-
-    val detailedReminder: BooleanPreference = preferences.detailedReminder
 
     init {
         NotallyDatabase.getDatabase(app).observeForever(::init)

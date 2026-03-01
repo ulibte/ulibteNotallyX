@@ -63,24 +63,6 @@
       android:id="@+id/Reminders"
       android:name="com.philkes.notallyx.presentation.activity.main.fragment.RemindersFragment"
       android:label="@string/reminders">
-
-        <action
-            android:id="@+id/action_reminders_to_detailed"
-            app:destination="@id/DetailedReminders"
-            app:popUpTo="@id/Reminders"
-            app:popUpToInclusive="true" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/DetailedReminders"
-        android:name="com.philkes.notallyx.presentation.activity.main.fragment.DetailedRemindersFragment"
-        android:label="@string/reminders">
-
-        <action
-            android:id="@+id/action_detailed_to_reminders"
-            app:destination="@id/Reminders"
-            app:popUpTo="@id/DetailedReminders"
-            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
