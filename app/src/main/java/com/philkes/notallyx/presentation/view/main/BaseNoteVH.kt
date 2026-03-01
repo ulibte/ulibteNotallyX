@@ -421,6 +421,7 @@ class BaseNoteVH(
             visibility = VISIBLE
             text = mostRecentNotificationDate.toText()
             setCloseIconVisible(haveAnyRepetition(baseNote.reminders))
+            setChipBackgroundColorResource(R.color.md_theme_secondaryContainer)
             val isElapsed = mostRecentNotificationDate < now
             alpha = if (isElapsed) 0.5f else 1.0f
             paintFlags =
