@@ -420,9 +420,7 @@ class BaseNoteVH(
         binding.ReminderChip.apply {
             visibility = VISIBLE
             text = mostRecentNotificationDate.toText()
-            if (haveAnyRepetition(baseNote.reminders)) {
-                setCloseIconVisible(true)
-            }
+            setCloseIconVisible(haveAnyRepetition(baseNote.reminders))
             val isElapsed = mostRecentNotificationDate < now
             alpha = if (isElapsed) 0.5f else 1.0f
             paintFlags =
