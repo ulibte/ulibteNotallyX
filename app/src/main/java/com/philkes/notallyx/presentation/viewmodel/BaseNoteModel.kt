@@ -117,7 +117,7 @@ class BaseNoteModel(private val app: Application) : AndroidViewModel(app) {
     var baseNotes: Content? = Content(MutableLiveData(), ::transform)
     var deletedNotes: Content? = Content(MutableLiveData(), ::transform)
     var archivedNotes: Content? = Content(MutableLiveData(), ::transform)
-    var reminderNotes: Content? = null
+    var reminderNotes: Content? = Content(MutableLiveData(), ::transform)
 
     val folder = NotNullLiveData(Folder.NOTES)
 
