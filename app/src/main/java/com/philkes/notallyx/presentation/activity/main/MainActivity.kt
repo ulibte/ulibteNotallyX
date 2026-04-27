@@ -1,6 +1,7 @@
 package com.philkes.notallyx.presentation.activity.main
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.transition.TransitionManager
 import android.view.Menu
@@ -18,10 +19,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -29,13 +28,12 @@ import androidx.navigation.navOptions
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.platform.MaterialFade
 import com.philkes.notallyx.R
 import com.philkes.notallyx.data.NotallyDatabase
 import com.philkes.notallyx.data.model.BaseNote
 import com.philkes.notallyx.data.model.Folder
+import com.philkes.notallyx.data.model.Label
 import com.philkes.notallyx.databinding.ActivityMainBinding
 import com.philkes.notallyx.presentation.activity.LockedActivity
 import com.philkes.notallyx.presentation.activity.main.fragment.DisplayLabelFragment.Companion.EXTRA_DISPLAYED_LABEL
@@ -43,16 +41,10 @@ import com.philkes.notallyx.presentation.activity.main.fragment.NotallyFragment
 import com.philkes.notallyx.presentation.activity.main.fragment.SearchFragment
 import com.philkes.notallyx.presentation.activity.note.EditListActivity
 import com.philkes.notallyx.presentation.activity.note.EditNoteActivity
-import com.philkes.notallyx.presentation.add
+import com.philkes.notallyx.presentation.activity.note.NoteActionHandler
+import com.philkes.notallyx.presentation.activity.note.handleRejection
 import com.philkes.notallyx.presentation.dp
-import com.philkes.notallyx.presentation.getQuantityString
-import com.philkes.notallyx.presentation.movedToResId
-import com.philkes.notallyx.presentation.setCancelButton
 import com.philkes.notallyx.presentation.setupProgressDialog
-import com.philkes.notallyx.presentation.view.misc.NotNullLiveData
-import com.philkes.notallyx.presentation.view.misc.tristatecheckbox.TriStateCheckBox
-import com.philkes.notallyx.presentation.view.misc.tristatecheckbox.setMultiChoiceTriStateItems
-import com.philkes.notallyx.presentation.viewmodel.BaseNoteModel
 import com.philkes.notallyx.presentation.viewmodel.BaseNoteModel.Companion.CURRENT_LABEL_EMPTY
 import com.philkes.notallyx.presentation.viewmodel.BaseNoteModel.Companion.CURRENT_LABEL_NONE
 import com.philkes.notallyx.presentation.viewmodel.ExportMimeType
@@ -62,11 +54,7 @@ import com.philkes.notallyx.presentation.viewmodel.progress.MigrationProgress
 import com.philkes.notallyx.utils.LATEST_DATA_SCHEMA
 import com.philkes.notallyx.utils.backup.exportNotes
 import com.philkes.notallyx.utils.runMigrations
-import com.philkes.notallyx.utils.shareNote
-import com.philkes.notallyx.utils.showColorSelectDialog
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : LockedActivity<ActivityMainBinding>() {
 
@@ -132,6 +120,28 @@ class MainActivity : LockedActivity<ActivityMainBinding>() {
     }
 
     override fun initViewModel() {}
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            NoteActionHandler.REQUEST_NOTIFICATION_PERMISSION_PIN_TO_STATUS -> {
+                if (
+                    grantResults.isNotEmpty() &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    val baseNotes = baseModel.actionMode.selectedNotes.values
+                    baseModel.pinBaseNotesToStatusBar(
+                        this@MainActivity,
+                        baseNotes.any { !it.isPinnedToStatus },
+                    )
+                } else handleRejection(R.string.to_pin_note_status_bar)
+            }
+        }
+    }
 
     private fun checkForMigrations(savedInstanceState: Bundle?) {
         // Run migrations first (blocking dialog), then proceed with initial navigation
@@ -260,8 +270,8 @@ class MainActivity : LockedActivity<ActivityMainBinding>() {
 
     private var labelsMenuItems: List<MenuItem> = listOf()
     private var labelsMoreMenuItem: MenuItem? = null
-    private var labels: List<String> = listOf()
-    private var labelsLiveData: LiveData<List<String>>? = null
+    private var labels: List<Label> = listOf()
+    private var labelsLiveData: LiveData<List<Label>>? = null
 
     private fun setupMenu() {
         binding.NavigationView.menu.apply {
@@ -310,19 +320,19 @@ class MainActivity : LockedActivity<ActivityMainBinding>() {
             .setIcon(R.drawable.label_more)
     }
 
-    private fun Menu.setupLabelsMenuItems(labels: List<String>, maxLabelsToDisplay: Int) {
+    private fun Menu.setupLabelsMenuItems(labels: List<Label>, maxLabelsToDisplay: Int) {
         removeGroup(1)
         addStaticLabelsMenuItems()
         labelsMenuItems =
             labels
                 .mapIndexed { index, label ->
-                    add(1, R.id.DisplayLabel, CATEGORY_CONTAINER + index + 3, label)
+                    add(1, R.id.DisplayLabel, CATEGORY_CONTAINER + index + 3, label.value)
                         .setCheckable(true)
-                        .setChecked(baseModel.currentLabel == label)
+                        .setChecked(baseModel.currentLabel == label.value)
                         .setVisible(index < maxLabelsToDisplay)
                         .setIcon(R.drawable.label)
                         .setOnMenuItemClickListener {
-                            navigateToLabel(label)
+                            navigateToLabel(label.value)
                             false
                         }
                 }
@@ -390,124 +400,13 @@ class MainActivity : LockedActivity<ActivityMainBinding>() {
         }
 
         val menu = binding.ActionMode.menu
-        baseModel.folder.observe(this@MainActivity, ModelFolderObserver(menu, baseModel))
+        baseModel.folder.observe(this@MainActivity, ModelFolderObserver(this, menu, baseModel))
         baseModel.actionMode.loading.observe(this@MainActivity) { loading ->
             menu.setGroupEnabled(Menu.NONE, !loading)
         }
     }
 
-    private fun moveNotes(folderTo: Folder) {
-        if (baseModel.actionMode.loading.value || baseModel.actionMode.isEmpty()) {
-            return
-        }
-        try {
-            baseModel.actionMode.loading.value = true
-            val folderFrom = baseModel.actionMode.getFirstNote().folder
-            val ids = baseModel.moveBaseNotes(folderTo)
-            Snackbar.make(
-                    findViewById(R.id.DrawerLayout),
-                    getQuantityString(folderTo.movedToResId(), ids.size),
-                    Snackbar.LENGTH_SHORT,
-                )
-                .apply { setAction(R.string.undo) { baseModel.moveBaseNotes(ids, folderFrom) } }
-                .show()
-        } finally {
-            baseModel.actionMode.loading.value = false
-        }
-    }
-
-    private fun share() {
-        val baseNote = baseModel.actionMode.getFirstNote()
-        this.shareNote(baseNote)
-    }
-
-    private fun deleteForever() {
-        MaterialAlertDialogBuilder(this)
-            .setMessage(R.string.delete_selected_notes)
-            .setPositiveButton(R.string.delete) { _, _ ->
-                val removedNotes = baseModel.actionMode.selectedNotes.values.toList()
-                baseModel.deleteSelectedBaseNotes()
-                Snackbar.make(
-                        findViewById(R.id.DrawerLayout),
-                        getQuantityString(R.plurals.deleted_selected_notes, removedNotes.size),
-                        Snackbar.LENGTH_SHORT,
-                    )
-                    .apply { setAction(R.string.undo) { baseModel.saveNotes(removedNotes) } }
-                    .show()
-            }
-            .setCancelButton()
-            .show()
-    }
-
-    private fun label() {
-        val baseNotes = baseModel.actionMode.selectedNotes.values
-        lifecycleScope.launch {
-            val labels = baseModel.getAllLabels()
-            if (labels.isNotEmpty()) {
-                displaySelectLabelsDialog(labels, baseNotes)
-            } else {
-                baseModel.actionMode.close(true)
-                navigateWithAnimation(R.id.Labels)
-            }
-        }
-    }
-
-    private fun displaySelectLabelsDialog(labels: Array<String>, baseNotes: Collection<BaseNote>) {
-        val checkedPositions =
-            labels
-                .map { label ->
-                    if (baseNotes.all { it.labels.contains(label) }) {
-                        TriStateCheckBox.State.CHECKED
-                    } else if (baseNotes.any { it.labels.contains(label) }) {
-                        TriStateCheckBox.State.PARTIALLY_CHECKED
-                    } else {
-                        TriStateCheckBox.State.UNCHECKED
-                    }
-                }
-                .toTypedArray()
-
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.labels)
-            .setCancelButton()
-            .setMultiChoiceTriStateItems(this, labels, checkedPositions) { idx, state ->
-                checkedPositions[idx] = state
-            }
-            .setPositiveButton(R.string.save) { _, _ ->
-                val checkedLabels =
-                    checkedPositions.mapIndexedNotNull { index, checked ->
-                        if (checked == TriStateCheckBox.State.CHECKED) {
-                            labels[index]
-                        } else null
-                    }
-                val uncheckedLabels =
-                    checkedPositions.mapIndexedNotNull { index, checked ->
-                        if (checked == TriStateCheckBox.State.UNCHECKED) {
-                            labels[index]
-                        } else null
-                    }
-                val updatedBaseNotesLabels =
-                    baseNotes.map { baseNote ->
-                        val noteLabels = baseNote.labels.toMutableList()
-                        checkedLabels.forEach { checkedLabel ->
-                            if (!noteLabels.contains(checkedLabel)) {
-                                noteLabels.add(checkedLabel)
-                            }
-                        }
-                        uncheckedLabels.forEach { uncheckedLabel ->
-                            if (noteLabels.contains(uncheckedLabel)) {
-                                noteLabels.remove(uncheckedLabel)
-                            }
-                        }
-                        noteLabels
-                    }
-                baseNotes.zip(updatedBaseNotesLabels).forEach { (baseNote, updatedLabels) ->
-                    baseModel.updateBaseNoteLabels(updatedLabels, baseNote.id)
-                }
-            }
-            .show()
-    }
-
-    private fun exportSelectedNotes(mimeType: ExportMimeType) {
+    internal fun exportSelectedNotes(mimeType: ExportMimeType) {
         exportNotes(
             baseModel.actionMode.selectedNotes.values,
             mimeType,
@@ -589,7 +488,7 @@ class MainActivity : LockedActivity<ActivityMainBinding>() {
                 bundle?.getString(EXTRA_DISPLAYED_LABEL)
     }
 
-    private fun navigateWithAnimation(id: Int) {
+    internal fun navigateWithAnimation(id: Int) {
         val options = navOptions {
             launchSingleTop = true
             anim {
@@ -620,186 +519,6 @@ class MainActivity : LockedActivity<ActivityMainBinding>() {
                     }
                 }
             }
-    }
-
-    private inner class ModelFolderObserver(
-        private val menu: Menu,
-        private val model: BaseNoteModel,
-    ) : Observer<Folder> {
-        override fun onChanged(value: Folder) {
-            menu.clear()
-            model.actionMode.count.removeObservers(this@MainActivity)
-
-            menu.add(
-                R.string.select_all,
-                R.drawable.select_all,
-                showAsAction = MenuItem.SHOW_AS_ACTION_ALWAYS,
-            ) {
-                getCurrentFragmentNotes?.invoke()?.let { model.actionMode.add(it) }
-            }
-            when (value) {
-                Folder.NOTES -> {
-                    val pinned = menu.addPinned(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    menu.addLabels(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    menu.addDelete(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    menu.add(R.string.duplicate, R.drawable.content_copy) {
-                        baseModel.duplicateSelectedBaseNotes()
-                    }
-                    menu.add(R.string.archive, R.drawable.archive) { moveNotes(Folder.ARCHIVED) }
-                    menu.addChangeColor()
-                    val share = menu.addShare()
-                    menu.addExportMenu()
-                    model.actionMode.count.observeCountAndPinned(this@MainActivity, share, pinned)
-                }
-
-                Folder.ARCHIVED -> {
-                    menu.add(
-                        R.string.unarchive,
-                        R.drawable.unarchive,
-                        MenuItem.SHOW_AS_ACTION_ALWAYS,
-                    ) {
-                        moveNotes(Folder.NOTES)
-                    }
-                    menu.addDelete(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    menu.add(R.string.duplicate, R.drawable.content_copy) {
-                        baseModel.duplicateSelectedBaseNotes()
-                    }
-                    menu.addExportMenu(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    val pinned = menu.addPinned()
-                    menu.addLabels()
-                    menu.addChangeColor()
-                    val share = menu.addShare()
-                    model.actionMode.count.observeCountAndPinned(this@MainActivity, share, pinned)
-                }
-
-                Folder.DELETED -> {
-                    menu.add(R.string.restore, R.drawable.restore, MenuItem.SHOW_AS_ACTION_ALWAYS) {
-                        moveNotes(Folder.NOTES)
-                    }
-                    menu.add(
-                        R.string.delete_forever,
-                        R.drawable.delete,
-                        MenuItem.SHOW_AS_ACTION_ALWAYS,
-                    ) {
-                        deleteForever()
-                    }
-                    menu.addExportMenu()
-                    menu.addChangeColor()
-                    val share = menu.add(R.string.share, R.drawable.share) { share() }
-                    model.actionMode.count.observeCount(this@MainActivity, share)
-                }
-            }
-        }
-
-        private fun Menu.addPinned(showAsAction: Int = MenuItem.SHOW_AS_ACTION_IF_ROOM): MenuItem {
-            return add(R.string.pin, R.drawable.pin, showAsAction) {}
-        }
-
-        private fun Menu.addLabels(showAsAction: Int = MenuItem.SHOW_AS_ACTION_IF_ROOM): MenuItem {
-            return add(R.string.labels, R.drawable.label, showAsAction) { label() }
-        }
-
-        private fun Menu.addChangeColor(
-            showAsAction: Int = MenuItem.SHOW_AS_ACTION_IF_ROOM
-        ): MenuItem {
-            return add(R.string.change_color, R.drawable.change_color, showAsAction) {
-                lifecycleScope.launch {
-                    val colors =
-                        withContext(Dispatchers.IO) {
-                            NotallyDatabase.getDatabase(
-                                    this@MainActivity,
-                                    observePreferences = false,
-                                )
-                                .value
-                                .getBaseNoteDao()
-                                .getAllColors()
-                                .toSet()
-                        }
-                    // Show color as selected only if all selected notes have the same color
-                    val currentColor =
-                        model.actionMode.selectedNotes.values
-                            .map { it.color }
-                            .distinct()
-                            .takeIf { it.size == 1 }
-                            ?.firstOrNull()
-                    showColorSelectDialog(
-                        colors,
-                        currentColor,
-                        null,
-                        { selectedColor, oldColor ->
-                            if (oldColor != null) {
-                                model.changeColor(oldColor, selectedColor)
-                            }
-                            model.colorBaseNote(selectedColor)
-                        },
-                    ) { colorToDelete, newColor ->
-                        model.changeColor(colorToDelete, newColor)
-                    }
-                }
-            }
-        }
-
-        private fun Menu.addDelete(showAsAction: Int = MenuItem.SHOW_AS_ACTION_IF_ROOM): MenuItem {
-            return add(R.string.delete, R.drawable.delete, showAsAction) {
-                moveNotes(Folder.DELETED)
-            }
-        }
-
-        private fun Menu.addShare(showAsAction: Int = MenuItem.SHOW_AS_ACTION_IF_ROOM): MenuItem {
-            return add(R.string.share, R.drawable.share, showAsAction) { share() }
-        }
-
-        private fun Menu.addExportMenu(
-            showAsAction: Int = MenuItem.SHOW_AS_ACTION_IF_ROOM
-        ): MenuItem {
-            return addSubMenu(R.string.export)
-                .apply {
-                    setIcon(R.drawable.export)
-                    item.setShowAsAction(showAsAction)
-                    ExportMimeType.entries.forEach {
-                        add(it.name).onClick { exportSelectedNotes(it) }
-                    }
-                }
-                .item
-        }
-
-        fun MenuItem.onClick(function: () -> Unit) {
-            setOnMenuItemClickListener {
-                function()
-                return@setOnMenuItemClickListener false
-            }
-        }
-
-        private fun NotNullLiveData<Int>.observeCount(
-            lifecycleOwner: LifecycleOwner,
-            share: MenuItem,
-            onCountChange: ((Int) -> Unit)? = null,
-        ) {
-            observe(lifecycleOwner) { count ->
-                binding.ActionMode.title = count.toString()
-                onCountChange?.invoke(count)
-                share.setVisible(count == 1)
-            }
-        }
-
-        private fun NotNullLiveData<Int>.observeCountAndPinned(
-            lifecycleOwner: LifecycleOwner,
-            share: MenuItem,
-            pinned: MenuItem,
-        ) {
-            observeCount(lifecycleOwner, share) {
-                val baseNotes = model.actionMode.selectedNotes.values
-                if (baseNotes.any { !it.pinned }) {
-                    pinned.setTitle(R.string.pin).setIcon(R.drawable.pin).onClick {
-                        model.pinBaseNotes(true)
-                    }
-                } else {
-                    pinned.setTitle(R.string.unpin).setIcon(R.drawable.unpin).onClick {
-                        model.pinBaseNotes(false)
-                    }
-                }
-            }
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

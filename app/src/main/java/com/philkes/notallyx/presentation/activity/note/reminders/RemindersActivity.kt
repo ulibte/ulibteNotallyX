@@ -33,6 +33,7 @@ import com.philkes.notallyx.presentation.add
 import com.philkes.notallyx.presentation.checkAlarmPermission
 import com.philkes.notallyx.presentation.checkNotificationPermission
 import com.philkes.notallyx.presentation.format
+import com.philkes.notallyx.presentation.getQuantityStringPlain
 import com.philkes.notallyx.presentation.initListView
 import com.philkes.notallyx.presentation.setCancelButton
 import com.philkes.notallyx.presentation.showAndFocus
@@ -162,7 +163,12 @@ class RemindersActivity : LockedActivity<ActivityRemindersBinding>(), ReminderLi
     }
 
     private fun setupRecyclerView() {
-        reminderAdapter = ReminderAdapter(this)
+        reminderAdapter =
+            ReminderAdapter(
+                preferences.dateFormatNoteView.value,
+                preferences.timeFormatNoteView.value,
+                this,
+            )
         binding.MainListView.apply {
             initListView(this@RemindersActivity)
             adapter = reminderAdapter
@@ -321,9 +327,9 @@ class RemindersActivity : LockedActivity<ActivityRemindersBinding>(), ReminderLi
 
         val monthlyOptionText =
             if (isLastDayOfMonth) {
-                getString(R.string.of_the_month_last, getString(R.string.day))
+                getString(R.string.of_the_month_last, getQuantityStringPlain(R.plurals.days, 1))
             } else {
-                "$dayOfMonth. ${getString(R.string.of_the_month, getString(R.string.day))}"
+                "$dayOfMonth. ${getString(R.string.of_the_month, getQuantityStringPlain(R.plurals.days, 1))}"
             }
 
         val options =
@@ -461,9 +467,12 @@ class RemindersActivity : LockedActivity<ActivityRemindersBinding>(), ReminderLi
 
     private fun confirmDeletion(reminder: Reminder) {
         MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.delete_reminder)
+            .setTitle(R.string.delete_reminder_question)
             .setMessage(
-                "${reminder.dateTime.format()}\n${reminder.repetition?.toText(this) ?: getString(R.string.reminder_no_repetition)}"
+                "${reminder.dateTime.format(
+                    preferences.dateFormatNoteView.value,
+                    preferences.timeFormatNoteView.value,
+                    ensureFullFormat = true,)}\n${reminder.repetition?.toText(this) ?: getString(R.string.reminder_no_repetition)}"
             )
             .setPositiveButton(R.string.delete) { _, _ ->
                 lifecycleScope.launch { model.removeReminder(reminder) }
@@ -481,9 +490,9 @@ class RemindersActivity : LockedActivity<ActivityRemindersBinding>(), ReminderLi
     }
 
     companion object {
+        private const val REQUEST_NOTIFICATION_PERMISSION_ON_OPEN_REQUEST_CODE = 101
+        private const val REQUEST_NOTIFICATION_PERMISSION_REQUEST_CODE = 102
         const val NOTE_ID = "NOTE_ID"
-        const val REQUEST_NOTIFICATION_PERMISSION_ON_OPEN_REQUEST_CODE = 101
-        const val REQUEST_NOTIFICATION_PERMISSION_REQUEST_CODE = 102
         const val NEW_REMINDER_ID = -1L
     }
 }

@@ -20,6 +20,10 @@
     </plurals>
     <string name="ascending">Ascending</string>
     <string name="attach_file">Attach file</string>
+    <plurals name="attachments">
+        <item quantity="one">Attachment</item>
+        <item quantity="other">Attachments</item>
+    </plurals>
     <string name="audio_recordings">Audio Recordings</string>
     <string name="auto_backup">Auto Backups</string>
     <string name="auto_backup_error_message">An error occurred during auto backup:\n\'%1$s\'\nPlease check your settings or report a bug</string>
@@ -108,10 +112,13 @@
     <string name="data_in_public_message">By enabling this, the app’s internal database and attached files will be moved into the app’s public folder (Android/media/com.philkes.notallyx). In combination with file synchronization apps this can be used to synchronize NotallyX data between multiple devices.</string>
     <string name="date">Date</string>
     <string name="date_format">Date format</string>
-    <string name="date_format_apply_in_note_view">Also apply in Note View</string>
-    <string name="date_format_hint">Applies selected date format in Notes Overview</string>
-    <string name="day">Day</string>
-    <string name="days">Days</string>
+    <string name="date_format_hint">Applies selected datetime format in Notes Overview</string>
+    <string name="date_format_note_view">Datetime Format Note View</string>
+    <string name="date_format_overview">Datetime Format Overview</string>
+    <plurals name="days">
+        <item quantity="one">Day</item>
+        <item quantity="other">Days</item>
+    </plurals>
     <string name="default_color_hint">This is the default color for new notes. To change it, make another color the default</string>
     <string name="default_list_note_view_mode">Default List-Note View Mode</string>
     <string name="delete">Delete</string>
@@ -125,7 +132,7 @@
     <string name="delete_image_forever">Delete image forever\?</string>
     <string name="delete_label">Delete label\?</string>
     <string name="delete_note_forever">Delete note forever\?</string>
-    <string name="delete_reminder">Delete reminder\?</string>
+    <string name="delete_reminder_question">Delete reminder\?</string>
     <string name="delete_selected_notes">Delete selected notes\?</string>
     <string name="deleted">Deleted</string>
     <plurals name="deleted_selected_notes">
@@ -175,6 +182,7 @@
     <string name="export_settings_failure">Failed to export settings, did you choose an invalid path\?</string>
     <string name="export_settings_message">All Settings will be exported to a JSON file, which can be used to re-import stored settings.\n\nBe aware, that this does not include encrypted settings like the auto-backup password or the biometric encryption key</string>
     <string name="export_settings_success">Successfully exported settings</string>
+    <string name="exported">Exported</string>
     <plurals name="exported_notes">
         <item quantity="one">Exported %1$s Note</item>
         <item quantity="other">Exported %1$s Notes</item>
@@ -195,6 +203,7 @@
     <string name="import_action">Import</string>
     <string name="import_backup">Import backup</string>
     <string name="import_backup_password_hint">If your backup is not password-protected simply press Import, otherwise enter the correct password.</string>
+    <string name="import_from_notally">To import from Notally, simply use \"%1$s\" instead</string>
     <string name="import_other">Import Notes from other App</string>
     <string name="import_settings">Import Settings</string>
     <string name="import_settings_failure">Failed to import settings, did you choose the correct file\?</string>
@@ -217,6 +226,7 @@
     <string name="invalid_google_keep">Invalid Google Takeout ZIP File provided</string>
     <string name="invalid_image">Invalid image</string>
     <string name="invalid_link">Copy a valid link into your clipboard</string>
+    <string name="invalid_quillpad">Invalid Quillpad ZIP File provided</string>
     <string name="italic">Italic</string>
     <string name="item">Item</string>
     <string name="json_files">JSON Files</string>
@@ -264,10 +274,15 @@
     <string name="no_auto_sort">No Autosort</string>
     <string name="none">None</string>
     <string name="not_exists">\'%1$s\' does not exist</string>
+    <string name="notally" translatable="false">Notally</string>
     <string name="note">Note</string>
     <string name="note_text_too_long_truncated">Text too long, truncated to %1$d characters</string>
     <string name="note_too_big_truncating">Note is too big to save, it was truncated to %1$s characters (was: %2$s)</string>
     <string name="notes">Notes</string>
+    <plurals name="notes">
+        <item quantity="one">Note</item>
+        <item quantity="other">Notes</item>
+    </plurals>
     <string name="notes_sorted_by">Notes sorted by</string>
     <plurals name="notes_too_big_truncating">
         <item quantity="one">%1$s Note is too big to save, it was truncated to %2$s characters</item>
@@ -275,12 +290,14 @@
     </plurals>
     <string name="of_the_month">%1$s of the month</string>
     <string name="of_the_month_last">Last %1$s of the month</string>
+    <string name="off">Off</string>
     <string name="open_link">Open link</string>
     <string name="open_note">Open Note</string>
     <string name="others">Others</string>
     <string name="pause">Pause</string>
     <string name="paused">Paused</string>
     <string name="pin">Pin</string>
+    <string name="pin_to_status_bar">Pin to status bar</string>
     <string name="pinned">Pinned</string>
     <string name="plain_text_files">Markdown/Plain Text Files</string>
     <string name="plain_text_files_help">In order to import your Notes from markdown/plain text files (single file or folder), click Import. Every file is imported as a separate note, the file’s name becomes the note’s title. If the text contents start with list syntax (e.g. Markdown ’- [x]’, NotallyX syntax ’[✓]’, or ’*’, ’-’) it will be converted to a List note.</string>
@@ -290,6 +307,8 @@
     <string name="please_grant_notally_notification">Please grant NotallyX the permission to send notifications</string>
     <string name="please_grant_notally_notification_auto_backup">If an auto backup fails you can receive a notification, if you grant NotallyX permission to send notifications</string>
     <string name="previous">Previous</string>
+    <string name="quillpad" translatable="false">Quillpad</string>
+    <string name="quillpad_help">In order to import your Notes from Quillpad you must export your Quillpad Notes as a .ZIP Backup file. To do that, open Quillpad, go to Settings &gt; Backup &gt; Create a backup, and save the .ZIP on your phone. \n\nIf you already have a Quillpad Backup .ZIP file, click Import and choose it.</string>
     <string name="rate">Rate this app</string>
     <string name="read_only">Read Only</string>
     <string name="ready_to_record">Ready to record</string>
@@ -354,7 +373,13 @@
     <string name="text_size_preview">Lorem ipsum dolor sit</string>
     <string name="theme">Theme</string>
     <string name="theme_use_dynamic_colors">Use system\'s wallpaper colors</string>
+    <string name="time">Time</string>
+    <string name="time_24h">24h</string>
+    <string name="time_am_pm">am/pm</string>
+    <string name="time_format_note_view">Time format Note View</string>
+    <string name="time_format_overview">Time format Overview</string>
     <string name="title">Title</string>
+    <string name="to_pin_note_status_bar">To pin a note to the status bar, allow NotallyX to send notifications. Tap Settings &gt; Permissions and allow Notifications</string>
     <string name="to_record_audio">To record audio, allow NotallyX access to your microphone. Tap Settings &gt; Permissions and turn Microphone on</string>
     <string name="unarchive">Unarchive</string>
     <plurals name="unarchived_selected_notes">
@@ -369,6 +394,7 @@
     <string name="unlock">Unlock via Biometric/PIN</string>
     <string name="unlock_with_biometrics_not_setup">You have previously enabled biometric lock but Biometrics/PIN are not setup for your device anymore.\n\nIf you wish to disable biometric lock press Disable, otherwise setup Biometrics/PIN for your device</string>
     <string name="unpin">Unpin</string>
+    <string name="unpin_from_status_bar">Unpin from status bar</string>
     <string name="upcoming">Upcoming</string>
     <string name="updated_link">Updated Link</string>
     <string name="view">View</string>

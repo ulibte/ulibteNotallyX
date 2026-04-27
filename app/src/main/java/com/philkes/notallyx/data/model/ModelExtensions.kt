@@ -14,6 +14,7 @@ import com.philkes.notallyx.data.dao.NoteIdReminder
 import com.philkes.notallyx.data.imports.markdown.createMarkdownFromBodyAndSpans
 import com.philkes.notallyx.data.model.BaseNote.Companion.COLOR_DEFAULT
 import com.philkes.notallyx.presentation.applySpans
+import com.philkes.notallyx.presentation.getQuantityStringPlain
 import com.philkes.notallyx.presentation.showToast
 import com.philkes.notallyx.presentation.viewmodel.NotallyModel
 import com.philkes.notallyx.utils.decodeToBitmap
@@ -123,6 +124,7 @@ fun String.toBaseNote(): BaseNote {
             ?: COLOR_DEFAULT
     val title = jsonObject.getStringOrDefault("title", "")
     val pinned = jsonObject.getBooleanOrDefault("pinned", false)
+    val pinnedToStatusBar = jsonObject.getBooleanOrDefault("isPinnedToStatus", false)
     val timestamp = jsonObject.getLongOrDefault("timestamp", System.currentTimeMillis())
     val modifiedTimestamp = jsonObject.getLongOrDefault("modifiedTimestamp", timestamp)
     val labels = Converters.jsonToLabels(jsonObject.getArrayOrEmpty("labels"))
@@ -152,6 +154,7 @@ fun String.toBaseNote(): BaseNote {
         audios,
         reminders,
         viewMode,
+        pinnedToStatusBar,
     )
 }
 
@@ -341,7 +344,10 @@ fun Reminder.toRepetitionText(context: Context): String {
         val isLastDayOfMonth = dayOfMonth == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
         return if (isLastDayOfMonth)
-            context.getString(R.string.of_the_month_last, context.getString(R.string.day))
+            context.getString(
+                R.string.of_the_month_last,
+                context.getQuantityStringPlain(R.plurals.days, 1),
+            )
         else context.getString(R.string.of_the_month, "$dayOfMonth.")
     }
     return rep.toText(context)
@@ -378,7 +384,7 @@ private fun RepetitionTimeUnit.toText(context: Context): String {
         when (this) {
             RepetitionTimeUnit.MINUTES -> R.string.minutes
             RepetitionTimeUnit.HOURS -> R.string.hours
-            RepetitionTimeUnit.DAYS -> R.string.days
+            RepetitionTimeUnit.DAYS -> return context.getQuantityStringPlain(R.plurals.days, 10)
             RepetitionTimeUnit.WEEKS -> R.string.weeks
             RepetitionTimeUnit.MONTHS -> R.string.months
             RepetitionTimeUnit.YEARS -> R.string.years

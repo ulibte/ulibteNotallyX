@@ -1,5 +1,35 @@
 # Changelog
 
+## [v7.11.0](https://github.com/Crustack/NotallyX/tree/v7.11.0) (2026-04-26)
+
+[Full Changelog](https://github.com/Crustack/NotallyX/compare/v7.10.0...v7.11.0)
+
+### Added Features
+
+- Quillpad import [\#964](https://github.com/Crustack/NotallyX/issues/964)
+- Hide Dates in Overview [\#930](https://github.com/Crustack/NotallyX/issues/930)
+- Request to Add Arabic Language Support [\#919](https://github.com/Crustack/NotallyX/issues/919)
+- Add delete reminder and delete note to reminder notification [\#914](https://github.com/Crustack/NotallyX/issues/914)
+- When a note is deleted its reminder should be deleted [\#912](https://github.com/Crustack/NotallyX/issues/912)
+- Pin to Status Bar [\#880](https://github.com/Crustack/NotallyX/issues/880)
+- Status Bar Icon Stack Idea [\#873](https://github.com/Crustack/NotallyX/issues/873)
+- Separate date and time formats and apply globally [\#842](https://github.com/Crustack/NotallyX/issues/842)
+- Change Labels order [\#787](https://github.com/Crustack/NotallyX/issues/787)
+- Show note content in reminder [\#610](https://github.com/Crustack/NotallyX/issues/610)
+- Fix checkbox alignment and text positioning for multi-line checklist items [\#982](https://github.com/Crustack/NotallyX/pull/982) ([krahulshharmaa](https://github.com/krahulshharmaa))
+- Replace setting sliders with steppers where useful [\#963](https://github.com/Crustack/NotallyX/pull/963) ([Crustack](https://github.com/Crustack))
+
+### Fixed Bugs
+
+- Notification open note goes to wrong note with several reminders [\#981](https://github.com/Crustack/NotallyX/issues/981)
+- Export Backup Progress Bar Misleading [\#970](https://github.com/Crustack/NotallyX/issues/970)
+- Crashed upon first launch after installing [\#965](https://github.com/Crustack/NotallyX/issues/965)
+- Incorrect display of links in notes filtered by search [\#943](https://github.com/Crustack/NotallyX/issues/943)
+- Import from Nottaly [\#938](https://github.com/Crustack/NotallyX/issues/938)
+- All my notes gone [\#917](https://github.com/Crustack/NotallyX/issues/917)
+- Consecutive task lists with the same name bug [\#899](https://github.com/Crustack/NotallyX/issues/899)
+- fix: cancel reminders when note is moved to deleted or archived folder in edit screen [\#950](https://github.com/Crustack/NotallyX/pull/950) ([ulibte](https://github.com/ulibte))
+
 ## [v7.10.0](https://github.com/Crustack/NotallyX/tree/v7.10.0) (2026-03-16)
 
 [Full Changelog](https://github.com/Crustack/NotallyX/compare/v7.9.1...v7.10.0)

@@ -35,7 +35,6 @@ class ChangeHistory(
         }
         changeStack.add(change)
         stackPointer.value = newStackPointer + 1
-        Log.d(TAG, "addChange: $change")
     }
 
     fun redo() {
@@ -71,8 +70,8 @@ class ChangeHistory(
     }
 
     fun reset() {
-        stackPointer.value = -1
         changeStack.clear()
+        stackPointer.value = -1
     }
 
     internal fun lookUp(position: Int = 0): Change {

@@ -26,6 +26,7 @@ data class BaseNote(
     val audios: List<Audio>,
     val reminders: List<Reminder>,
     val viewMode: NoteViewMode,
+    val isPinnedToStatus: Boolean,
 ) : Item {
 
     companion object {
@@ -55,8 +56,18 @@ data class BaseNote(
         if (audios != other.audios) return false
         if (reminders != other.reminders) return false
         if (viewMode != other.viewMode) return false
+        if (isPinnedToStatus != other.isPinnedToStatus) return false
 
         return true
+    }
+
+    fun equalContents(other: BaseNote?): Boolean {
+        if (other == null) return false
+        return type == other.type &&
+            title == other.title &&
+            body == other.body &&
+            spans == other.spans &&
+            items == other.items
     }
 
     override fun hashCode(): Int {
@@ -76,6 +87,7 @@ data class BaseNote(
         result = 31 * result + audios.hashCode()
         result = 31 * result + reminders.hashCode()
         result = 31 * result + viewMode.hashCode()
+        result = 31 * result + isPinnedToStatus.hashCode()
         return result
     }
 }

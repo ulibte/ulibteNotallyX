@@ -42,10 +42,34 @@ class NotallyXPreferences private constructor(private val context: Context) {
         )
     val textSizeOverview =
         FloatPreference("textSizeOverview", preferences, 16f, 12f, 32f, R.string.text_size_overview)
-    val dateFormat =
-        createEnumPreference(preferences, "dateFormat", DateFormat.RELATIVE, R.string.date_format)
-    val applyDateFormatInNoteView =
-        BooleanPreference("applyDateFormatInNoteView", preferences, true)
+    val dateFormatOverview =
+        createEnumPreference(
+            preferences,
+            "dateFormatOverview",
+            DateFormat.DD_MM_YY_GER,
+            R.string.date_format_overview,
+        )
+    val timeFormatOverview =
+        createEnumPreference(
+            preferences,
+            "timeFormatOverview",
+            TimeFormat.NONE,
+            R.string.time_format_overview,
+        )
+    val dateFormatNoteView =
+        createEnumPreference(
+            preferences,
+            "dateFormatNoteView",
+            DateFormat.DD_MM_YY_GER,
+            R.string.date_format_note_view,
+        )
+    val timeFormatNoteView =
+        createEnumPreference(
+            preferences,
+            "timeFormatNoteView",
+            TimeFormat.TWENTY_FOUR_H,
+            R.string.time_format_note_view,
+        )
 
     val notesView = createEnumPreference(preferences, "view", NotesView.LIST, R.string.view)
     val notesSorting = NotesSortPreference(preferences)
@@ -122,7 +146,7 @@ class NotallyXPreferences private constructor(private val context: Context) {
             preferences,
             5,
             0,
-            20,
+            200,
             R.string.max_labels_to_display,
         )
 
@@ -139,7 +163,7 @@ class NotallyXPreferences private constructor(private val context: Context) {
             preferences,
             0,
             0,
-            365,
+            3650,
             R.string.auto_remove_deleted_notes,
         )
 
@@ -158,7 +182,7 @@ class NotallyXPreferences private constructor(private val context: Context) {
             preferences,
             5,
             -1,
-            20,
+            60 * 60 * 5,
             R.string.auto_save_after_idle_time,
         )
 
@@ -262,7 +286,8 @@ class NotallyXPreferences private constructor(private val context: Context) {
     }
 
     fun showDateCreated(): Boolean {
-        return dateFormat.value != DateFormat.NONE
+        return dateFormatNoteView.value != DateFormat.NONE ||
+            timeFormatNoteView.value != TimeFormat.NONE
     }
 
     fun toJsonString(): String {
@@ -300,8 +325,10 @@ class NotallyXPreferences private constructor(private val context: Context) {
         setOf(
                 textSizeNoteEditor,
                 textSizeOverview,
-                dateFormat,
-                applyDateFormatInNoteView,
+                dateFormatOverview,
+                timeFormatOverview,
+                dateFormatNoteView,
+                timeFormatNoteView,
                 notesView,
                 notesSorting,
                 listItemSorting,

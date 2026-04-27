@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.Settings
 import android.text.method.PasswordTransformationMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +31,7 @@ import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_T
 import com.philkes.notallyx.NotallyXApplication
 import com.philkes.notallyx.R
 import com.philkes.notallyx.cancelAutoRemoveOldDeletedNotes
+import com.philkes.notallyx.data.imports.Display
 import com.philkes.notallyx.data.imports.FOLDER_OR_FILE_MIMETYPE
 import com.philkes.notallyx.data.imports.ImportSource
 import com.philkes.notallyx.data.imports.txt.APPLICATION_TEXT_MIME_TYPES
@@ -37,6 +39,7 @@ import com.philkes.notallyx.databinding.DialogTextInputBinding
 import com.philkes.notallyx.databinding.FragmentSettingsBinding
 import com.philkes.notallyx.presentation.activity.main.MainActivity
 import com.philkes.notallyx.presentation.format
+import com.philkes.notallyx.presentation.getQuantityStringPlain
 import com.philkes.notallyx.presentation.setCancelButton
 import com.philkes.notallyx.presentation.setEnabledSecureFlag
 import com.philkes.notallyx.presentation.setupImportProgressDialog
@@ -293,17 +296,29 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        dateFormat.merge(applyDateFormatInNoteView).observe(viewLifecycleOwner) {
-            (dateFormatValue, applyDateFormatInEditNoteValue) ->
-            binding.DateFormat.setup(
-                dateFormat,
-                dateFormatValue,
-                applyDateFormatInEditNoteValue,
+        dateFormatOverview.merge(timeFormatOverview).observe(viewLifecycleOwner) { (date, time) ->
+            binding.DateFormatOverview.setupDateTimeFormat(
+                R.string.date_format_overview,
+                dateFormatOverview,
+                timeFormatOverview,
                 requireContext(),
                 layoutInflater,
-            ) { newDateFormatValue, newApplyDateFormatInEditNote ->
-                model.savePreference(dateFormat, newDateFormatValue)
-                model.savePreference(applyDateFormatInNoteView, newApplyDateFormatInEditNote)
+            ) { newDate, newTime ->
+                model.savePreference(dateFormatOverview, newDate)
+                model.savePreference(timeFormatOverview, newTime)
+            }
+        }
+
+        dateFormatNoteView.merge(timeFormatNoteView).observe(viewLifecycleOwner) { (date, time) ->
+            binding.DateFormatNoteView.setupDateTimeFormat(
+                R.string.date_format_note_view,
+                dateFormatNoteView,
+                timeFormatNoteView,
+                requireContext(),
+                layoutInflater,
+            ) { newDate, newTime ->
+                model.savePreference(dateFormatNoteView, newDate)
+                model.savePreference(timeFormatNoteView, newTime)
             }
         }
 
@@ -364,10 +379,15 @@ class SettingsFragment : Fragment() {
         }
 
         autoRemoveDeletedNotesAfterDays.observe(viewLifecycleOwner) { value ->
-            binding.AutoEmptyBin.setupAutoEmptyBin(
+            binding.AutoEmptyBin.setup(
                 autoRemoveDeletedNotesAfterDays,
                 requireContext(),
+                labelFormatter = { v ->
+                    if (v == 0) requireContext().getString(R.string.off)
+                    else "$v ${requireContext().getQuantityStringPlain(R.plurals.days, v)}"
+                },
             ) { newValue ->
+                Log.d("Stepper", "save auto remove")
                 model.savePreference(autoRemoveDeletedNotesAfterDays, newValue)
                 val workManager = WorkManager.getInstance(requireContext())
                 if (newValue > 0) {
@@ -388,7 +408,7 @@ class SettingsFragment : Fragment() {
             binding.StartView.setupStartView(
                 startView,
                 startViewValue,
-                labelsValue,
+                labelsValue?.map { it.value },
                 requireContext(),
                 layoutInflater,
             ) { newValue ->
@@ -502,17 +522,41 @@ class SettingsFragment : Fragment() {
     }
 
     private fun importFromOtherApp() {
+        val notallyItem =
+            mutableListOf(
+                object : Display {
+                    override fun getTextId(): Int {
+                        return R.string.notally
+                    }
+
+                    override fun getIconId(): Int {
+                        return R.drawable.icon_notally
+                    }
+                }
+            )
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.choose_other_app)
             .setAdapter(
                 TextWithIconAdapter(
                     requireContext(),
-                    ImportSource.entries.toMutableList(),
-                    { item -> getString(item.displayNameResId) },
-                    ImportSource::iconResId,
+                    notallyItem + ImportSource.entries.toMutableList(),
+                    { item -> getString(item.getTextId()) },
+                    Display::getIconId,
                 )
             ) { _, which ->
-                selectedImportSource = ImportSource.entries[which]
+                if (which == 0) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setMessage(
+                            getString(
+                                R.string.import_from_notally,
+                                getString(R.string.import_backup),
+                            )
+                        )
+                        .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
+                        .show()
+                    return@setAdapter
+                }
+                selectedImportSource = ImportSource.entries[which - 1]
                 MaterialAlertDialogBuilder(requireContext())
                     .setMessage(selectedImportSource.helpTextResId)
                     .setPositiveButton(R.string.import_action) { dialog, _ ->
@@ -618,15 +662,25 @@ class SettingsFragment : Fragment() {
                 model.savePreference(preference, preference.value.copy(periodInDays = 0))
             }
         }
-        lastExecutionPreference.observe(viewLifecycleOwner) { time ->
-            binding.PeriodicBackupLastExecution.apply {
-                if (time != -1L) {
-                    isVisible = true
-                    text =
-                        "${requireContext().getString(R.string.auto_backup_last)}: ${Date(time).format()}"
-                } else isVisible = false
+        lastExecutionPreference
+            .merge(model.preferences.dateFormatOverview, model.preferences.timeFormatOverview)
+            .observe(viewLifecycleOwner) { (time, _, _) ->
+                binding.PeriodicBackupLastExecution.apply {
+                    if (time != -1L) {
+                        isVisible = true
+                        text =
+                            Date(time)
+                                .format(
+                                    model.preferences.dateFormatOverview.value,
+                                    model.preferences.timeFormatOverview.value,
+                                    ensureFullFormat = true,
+                                )
+                                .let { lastBackupFormatted ->
+                                    "${requireContext().getString(R.string.auto_backup_last)}: $lastBackupFormatted"
+                                }
+                    } else isVisible = false
+                }
             }
-        }
         binding.PeriodicBackupsPeriodInDays.setup(
             value.periodInDays,
             R.string.backup_period_days,
@@ -746,8 +800,13 @@ class SettingsFragment : Fragment() {
                     }
                 }
             }
-            AutoSaveAfterIdle.setupAutoSaveIdleTime(autoSaveAfterIdleTime, requireContext()) {
-                newValue ->
+            AutoSaveAfterIdle.setup(
+                autoSaveAfterIdleTime,
+                requireContext(),
+                labelFormatter = { v ->
+                    if (v == -1) requireContext().getString(R.string.off) else "${v}s"
+                },
+            ) { newValue ->
                 model.savePreference(autoSaveAfterIdleTime, newValue)
             }
 

@@ -10,6 +10,7 @@ import com.philkes.notallyx.data.NotallyDatabase
 import com.philkes.notallyx.data.dao.BaseNoteDao.Companion.MAX_BODY_CHAR_LENGTH
 import com.philkes.notallyx.data.imports.evernote.EvernoteImporter
 import com.philkes.notallyx.data.imports.google.GoogleKeepImporter
+import com.philkes.notallyx.data.imports.quillpad.QuillpadImporter
 import com.philkes.notallyx.data.imports.txt.JsonImporter
 import com.philkes.notallyx.data.imports.txt.PlainTextImporter
 import com.philkes.notallyx.data.model.Audio
@@ -44,6 +45,7 @@ class NotesImporter(private val app: Application, private val database: NotallyD
                 try {
                     when (importSource) {
                         ImportSource.GOOGLE_KEEP -> GoogleKeepImporter()
+                        ImportSource.QUILLPAD -> QuillpadImporter()
                         ImportSource.EVERNOTE -> EvernoteImporter()
                         ImportSource.PLAIN_TEXT -> PlainTextImporter()
                         ImportSource.JSON -> JsonImporter()
@@ -53,7 +55,15 @@ class NotesImporter(private val app: Application, private val database: NotallyD
                     progress?.postValue(ImportProgress(inProgress = false))
                     throw e
                 }
-            database.getLabelDao().insert(notes.flatMap { it.labels }.distinct().map { Label(it) })
+            val labelDao = database.getLabelDao()
+            val maxOrder = labelDao.getMaxOrder() ?: -1
+            labelDao.insert(
+                notes
+                    .flatMap { it.labels }
+                    .distinct()
+                    .sorted()
+                    .mapIndexed { index, value -> Label(value, maxOrder + 1 + index) }
+            )
             val files = notes.flatMap { it.files }.distinct()
             val images = notes.flatMap { it.images }.distinct()
             val audios = notes.flatMap { it.audios }.distinct()
@@ -179,7 +189,7 @@ enum class ImportSource(
     val helpTextResId: Int,
     val documentationUrl: String?,
     val iconResId: Int,
-) {
+) : Display {
     GOOGLE_KEEP(
         R.string.google_keep,
         MIME_TYPE_ZIP,
@@ -194,6 +204,13 @@ enum class ImportSource(
         "https://help.evernote.com/hc/en-us/articles/209005557-Export-notes-and-notebooks-as-ENEX-or-HTML",
         R.drawable.icon_evernote,
     ),
+    QUILLPAD(
+        R.string.quillpad,
+        MIME_TYPE_ZIP,
+        R.string.quillpad_help,
+        "https://quillpad.github.io/",
+        R.drawable.icon_quillpad,
+    ),
     PLAIN_TEXT(
         R.string.plain_text_files,
         FOLDER_OR_FILE_MIMETYPE,
@@ -207,7 +224,21 @@ enum class ImportSource(
         R.string.json_files_help,
         null,
         R.drawable.file_json,
-    ),
+    );
+
+    override fun getTextId(): Int {
+        return displayNameResId
+    }
+
+    override fun getIconId(): Int {
+        return iconResId
+    }
+}
+
+interface Display {
+    fun getTextId(): Int
+
+    fun getIconId(): Int
 }
 
 const val FOLDER_OR_FILE_MIMETYPE = "FOLDER_OR_FILE"

@@ -104,10 +104,11 @@
     <string name="data_in_public_message">Wird dies aktiviert, werden die app-interne Datenbank und angehängte Dateien in einen öffentlichen Ordner ausgelagert (Android/media/com.philkes.notallyx). In Kombination mit Datei-Synchronisations Apps kann dies genutzt werden um NotallyX Daten zwischen mehrere Geräte zu synchronisieren.</string>
     <string name="date">Datum</string>
     <string name="date_format">Datumsformat</string>
-    <string name="date_format_apply_in_note_view">Auch in Notiz-Ansicht anwenden</string>
     <string name="date_format_hint">Wendet ausgewähltes Datumsformat in Notizen-Übersicht an</string>
-    <string name="day">Tag</string>
-    <string name="days">Tage</string>
+    <plurals name="days">
+        <item quantity="one">Tag</item>
+        <item quantity="other">Tage</item>
+    </plurals>
     <string name="delete">Löschen</string>
     <string name="delete_all">Alles löschen</string>
     <string name="delete_all_notes">Alle Notizen löschen\?</string>
@@ -119,7 +120,7 @@
     <string name="delete_image_forever">Bild endgültig löschen\?</string>
     <string name="delete_label">Label löschen\?</string>
     <string name="delete_note_forever">Notiz endgültig löschen\?</string>
-    <string name="delete_reminder">Erinnerung löschen\?</string>
+    <string name="delete_reminder_question">Erinnerung löschen\?</string>
     <string name="delete_selected_notes">Ausgewählte Notizen löschen\?</string>
     <string name="deleted">Papierkorb</string>
     <plurals name="deleted_selected_notes">

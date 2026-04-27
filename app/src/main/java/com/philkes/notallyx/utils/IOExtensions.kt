@@ -13,6 +13,7 @@ import androidx.lifecycle.MutableLiveData
 import com.philkes.notallyx.data.NotallyDatabase.Companion.DATABASE_NAME
 import com.philkes.notallyx.data.model.Attachment
 import com.philkes.notallyx.data.model.Audio
+import com.philkes.notallyx.data.model.BaseNote
 import com.philkes.notallyx.data.model.FileAttachment
 import com.philkes.notallyx.data.model.isImage
 import com.philkes.notallyx.presentation.view.misc.Progress
@@ -22,11 +23,15 @@ import com.philkes.notallyx.presentation.widget.WidgetProvider
 import java.io.File
 import java.io.FileFilter
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.net.URLConnection
+import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.security.MessageDigest
 import java.util.zip.CRC32
+import kotlin.collections.map
 import net.lingala.zip4j.ZipFile
 
 private const val TAG = "IO"
@@ -283,8 +288,34 @@ fun File.copyToLarge(
     return copyTo(target = target, overwrite = overwrite, bufferSize = bufferSize)
 }
 
+fun File.moveAllFiles(to: File) {
+    if (!exists() || !isDirectory) return
+
+    if (!to.exists()) {
+        to.mkdirs()
+    }
+
+    listFiles()?.forEach { file ->
+        val targetFile = File(to, file.name)
+        file.renameTo(targetFile)
+    }
+}
+
 fun InputStream.copyToLarge(target: OutputStream, bufferSize: Int = BUFFER_SIZE): Long {
     return copyTo(out = target, bufferSize = bufferSize)
+}
+
+fun ContextWrapper.deleteAttachments(
+    notes: Collection<BaseNote>,
+    progress: MutableLiveData<Progress>? = null,
+) {
+    val attachments = ArrayList<Attachment>()
+    notes.forEach { note ->
+        attachments.addAll(note.images)
+        attachments.addAll(note.files)
+        attachments.addAll(note.audios)
+    }
+    deleteAttachments(attachments, notes.map { it.id }.toLongArray(), progress)
 }
 
 fun ContextWrapper.deleteAttachments(
@@ -354,7 +385,15 @@ private fun getDirectory(dir: File, name: String): File {
 
 private fun File.createDirectory() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        Files.createDirectory(toPath())
+        try {
+            Files.createDirectory(toPath())
+        } catch (e: FileAlreadyExistsException) {
+            if (!isDirectory)
+                throw IOException(
+                    "Creating directory '${toPath()}' did not work because a file with that name already exists and was not properly deleted",
+                    e,
+                )
+        }
     } else mkdir()
 }
 
@@ -373,6 +412,10 @@ fun String.mimeTypeToFileExtension(): String? {
         "image/webp" -> "webp"
         else -> null
     }
+}
+
+fun String.getMimeType(): String? {
+    return URLConnection.guessContentTypeFromName(this)
 }
 
 fun File.listFilesRecursive(filter: FileFilter? = null): List<File> {

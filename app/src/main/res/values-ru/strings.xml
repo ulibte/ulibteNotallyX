@@ -95,9 +95,12 @@
     <string name="data_in_public_message">При включении этой функции внутренняя база данных приложения и прикрепленные файлы будут перенесены в его общедоступную папку (Android/media/com.philkes.notallyx). Это позволит синхронизировать данные NotallyX между устройствами с помощью приложений для синхронизации файлов.</string>
     <string name="date">Дата</string>
     <string name="date_format">Формат даты</string>
-    <string name="date_format_apply_in_note_view">Применять и в просмотре заметки</string>
     <string name="date_format_hint">Применяет выбранный формат даты в общем списке заметок</string>
-    <string name="days">Дней</string>
+    <plurals name="days">
+        <item quantity="few">Дня</item>
+        <item quantity="one">День</item>
+        <item quantity="other">Дней</item>
+    </plurals>
     <string name="delete">Удалить</string>
     <string name="delete_all">Удалить всё</string>
     <string name="delete_all_notes">Удалить все заметки\?</string>
@@ -109,7 +112,7 @@
     <string name="delete_image_forever">Удалить изображение навсегда\?</string>
     <string name="delete_label">Удалить метку\?</string>
     <string name="delete_note_forever">Удалить заметку навсегда\?</string>
-    <string name="delete_reminder">Удалить напоминание\?</string>
+    <string name="delete_reminder_question">Удалить напоминание\?</string>
     <string name="delete_selected_notes">Удалить выбранные заметки\?</string>
     <string name="deleted">Удалённые</string>
     <plurals name="deleted_selected_notes">

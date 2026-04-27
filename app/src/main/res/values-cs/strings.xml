@@ -107,10 +107,11 @@
     <string name="data_in_public_message">Pokud tuto možnost povolíte, interní databáze aplikace a připojené soubory budou přesunuty do veřejné složky aplikace (Android/media/com.philkes.notallyx). V kombinaci s aplikacemi pro synchronizaci souborů to může být použito k synchronizaci dat NotallyX mezi více zařízeními.</string>
     <string name="date">Datum</string>
     <string name="date_format">Formát data</string>
-    <string name="date_format_apply_in_note_view">Použít také v poznámkách</string>
     <string name="date_format_hint">Nastaví vybraný formát data v přehledu poznámek</string>
-    <string name="day">Den</string>
-    <string name="days">Dny</string>
+    <plurals name="days">
+        <item quantity="one">Den</item>
+        <item quantity="other">Dny</item>
+    </plurals>
     <string name="delete">Smazat</string>
     <string name="delete_all">Smazat vše</string>
     <string name="delete_all_notes">Smazat všechny poznámky\?</string>
@@ -122,7 +123,7 @@
     <string name="delete_image_forever">Smazat obrázek\?</string>
     <string name="delete_label">Smazat štítek\?</string>
     <string name="delete_note_forever">Smazat poznámku\?</string>
-    <string name="delete_reminder">Odebrat upomínku\?</string>
+    <string name="delete_reminder_question">Odebrat upomínku\?</string>
     <string name="delete_selected_notes">Smazat vybrané poznámky\?</string>
     <string name="deleted">Smazané</string>
     <plurals name="deleted_selected_notes">

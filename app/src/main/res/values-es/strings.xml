@@ -26,12 +26,16 @@
     <string name="auto_backup_last">Última copia de seguridad</string>
     <string name="auto_backup_on_save">Copia de seguridad automática al salir una nota</string>
     <string name="auto_backup_on_save_hint">Al habilitar esta opción, se crea automáticamente una copia de seguridad (\"NotallyX_AutoBackup.zip\") en la \"Directorio de copias de seguridad\" configurada cada vez que se guarda una nota.\nTenga en cuenta que esto puede afectar el rendimiento.</string>
+    <string name="auto_backup_skipped_files">Omitido %1$d ficheros o imágenes adjuntas ausentes</string>
     <string name="auto_backups_folder">Directorio de copias de seguridad</string>
     <string name="auto_backups_folder_hint">Carpeta donde se guardan las copias de seguridad automáticas.</string>
     <string name="auto_backups_folder_rechoose">Debe volver a elegir su directorio de copias de seguridad para que NotallyX tenga permiso para escribir en ella.\nTambién puede presionar Cancelar para omitir la importación del valor del directorio de copias de seguridad</string>
     <string name="auto_backups_folder_set">Establece primero la carpeta de copia en opción anterior</string>
+    <string name="auto_remove_deleted_notes">Eliminar automáticamente las notas borradas de forma permanente después de</string>
+    <string name="auto_remove_deleted_notes_hint">Al habilitar esta opción, las notas que se eliminaron se eliminarán permanentemente después de X días.</string>
     <string name="auto_save_after_idle_time">Autoguardar nota después de un lapso de inactividad</string>
     <string name="auto_sort_by_checked">Ordenar con los elementos marcados al final</string>
+    <string name="auto_sort_by_checked_timestamp">Ordenar los elementos marcado por fecha</string>
     <string name="back">Volver</string>
     <string name="backup">Respaldar</string>
     <string name="backup_password">Contraseña de copia de seguridad</string>
@@ -67,12 +71,16 @@
     <string name="cant_load_image">No se pudo cargar la imagen. Puede haber sido movida o borrada</string>
     <string name="cant_open_link">No se puede abrir el enlace</string>
     <string name="change_color">Cambiar color</string>
+    <string name="change_color_default_message">La ★ marca el color por defecto para notas nuevas.</string>
     <string name="change_color_message">Elige un color o crea uno nuevo.\nPuedes también editar un color con una pulsación larga sobre él.</string>
     <string name="change_note">Cambiar nota</string>
     <string name="check_all_items">Marcar todos los elementos</string>
     <string name="choose_another_folder">Elegir otra carpeta</string>
     <string name="choose_folder">Elegir carpeta</string>
     <string name="choose_other_app">Elegir aplicación de la que importar</string>
+    <string name="clean_up">Limpiar</string>
+    <string name="cleanup_finished_summary">Eliminados %1$d adjuntos ausentes de %2$d notas</string>
+    <string name="cleanup_finished_title">Limpieza finalizada</string>
     <string name="clear">Limpiar</string>
     <string name="clear_data">Limpiar datos</string>
     <string name="clear_data_message">Todas las notas, imágenes, ficheros, audios serán borrados permanentemente</string>
@@ -98,9 +106,13 @@
     <string name="data_in_public_message">Al habilitar esta opción, la base de datos interna de la aplicación se moverá al directorio público de la aplicación (Android/media/com.philkes.notallyx).\nEn combinación con aplicaciones de sincronización de archivos, esta opción se puede utilizar para sincronizar datos de NotallyX entre varios dispositivos.</string>
     <string name="date">Fecha</string>
     <string name="date_format">Formato de fecha</string>
-    <string name="date_format_apply_in_note_view">Aplicar también en la vista de nota</string>
     <string name="date_format_hint">Aplica el formato de fecha seleccionado en la vista general de notas</string>
-    <string name="days">Días</string>
+    <plurals name="days">
+        <item quantity="one">Día</item>
+        <item quantity="other">Días</item>
+    </plurals>
+    <string name="default_color_hint">Este es color por defecto para nuevas notas. Para cambiarlo, hacer otro color por defecto</string>
+    <string name="default_list_note_view_mode">Modo de vista de lista de notas por defecto</string>
     <string name="delete">Eliminar</string>
     <string name="delete_all">Borrar todo</string>
     <string name="delete_all_notes">¿Borrar todas las notas\?</string>
@@ -112,7 +124,7 @@
     <string name="delete_image_forever">¿Borrar imagen para siempre\?</string>
     <string name="delete_label">¿Eliminar etiqueta\?</string>
     <string name="delete_note_forever">¿Eliminar nota para siempre\?</string>
-    <string name="delete_reminder">¿Borrar recordatorio\?</string>
+    <string name="delete_reminder_question">¿Borrar recordatorio\?</string>
     <string name="delete_selected_notes">¿Borrar notas seleccionadas\?</string>
     <string name="deleted">Eliminados</string>
     <plurals name="deleted_selected_notes">
@@ -133,6 +145,11 @@
     <string name="documentation">Documentación</string>
     <string name="donate">Hacer donación</string>
     <string name="drag_handle">Arrastra la asa</string>
+    <string name="duplicate">Duplicar</string>
+    <plurals name="duplicates">
+        <item quantity="one">%1$d duplicado</item>
+        <item quantity="other">%1$d duplicados</item>
+    </plurals>
     <string name="edit">Editar</string>
     <string name="edit_color">Editar color</string>
     <string name="edit_label">Editar etiqueta</string>
@@ -203,12 +220,15 @@
     <string name="item">Elemento</string>
     <string name="json_files">Ficheros JSON</string>
     <string name="json_files_help">Para importar tus notas desde ficheros JSON (fichero único o carpeta), pincha en Importar. Cada fichero fichero JSON válido se importa como nota separada, el nombre del fichero será el título de la nota.</string>
+    <string name="jump_to_bottom">Saltar abajo</string>
+    <string name="jump_to_top">Saltar arriba</string>
     <string name="label_exists">Etiqueta existe</string>
     <string name="label_visibility">Ocultar/mostrar etiqueta en el panel de navegación</string>
     <string name="labels">Etiquetas</string>
     <string name="labels_hidden_in_overview">Al habilitar esto, las etiquetas de las notas se ocultarán en la vista general.</string>
     <string name="labels_hidden_in_overview_title">Ocultar etiquetas en vista general</string>
     <string name="large">Grande</string>
+    <string name="last_used">Último utilizado</string>
     <string name="libraries">Bibliotecas</string>
     <string name="light">Claro</string>
     <string name="link">Enlace</string>
@@ -216,6 +236,7 @@
     <string name="list">Lista</string>
     <string name="list_item_auto_sort">Ordenar lista de elementos</string>
     <string name="locked">Bloqueado</string>
+    <string name="make_default">Establecer por defecto</string>
     <string name="make_feature_request">Hacer petición de característica</string>
     <string name="make_list">Hacer lista</string>
     <string name="max_backups">Cantidad de copias a mantener</string>
@@ -224,6 +245,9 @@
     <string name="max_lines_to_display">Número máximo de elementos para mostrar en nota</string>
     <string name="max_lines_to_display_title">Número máximo de líneas en el título</string>
     <string name="medium">Mediano</string>
+    <string name="migrating_data">Migrando datos…</string>
+    <string name="migration_moving_attachments">Moviendo adjuntos…</string>
+    <string name="migration_splitting_notes">Dividiendo notas de gran tamaño…</string>
     <string name="minutes">Minutos</string>
     <string name="modified_date">Modificado</string>
     <string name="monospace">Monoespaciado</string>
@@ -240,8 +264,16 @@
     <string name="none">Ninguno</string>
     <string name="not_exists">\'%1$s’ no existe</string>
     <string name="note">Nota</string>
+    <string name="note_text_too_long_truncated">Texto demasiado largo, truncando a %1$d caracteres</string>
+    <string name="note_too_big_truncating">La nota es demasiado grande para guardarla, ha sido truncada a %1$s caracteres (tenía %2$s)</string>
     <string name="notes">Notas</string>
     <string name="notes_sorted_by">Notas ordenadas por</string>
+    <plurals name="notes_too_big_truncating">
+        <item quantity="one">%1$s nota es demasiado grande para guardarla, ha sido truncada a %2$s caracteres</item>
+        <item quantity="other">%1$s notas son demasiado grandes para guardarlas, han sido truncadas a %2$s caracteres</item>
+    </plurals>
+    <string name="of_the_month">%1$s de mes</string>
+    <string name="of_the_month_last">Último %1$s de mes</string>
     <string name="open_link">Abrir enlace</string>
     <string name="open_note">Abrir nota</string>
     <string name="others">Otros</string>
@@ -293,6 +325,8 @@
     <string name="select_labels">Seleccionar etiquetas</string>
     <string name="select_note">Seleccionar nota</string>
     <string name="send_feedback">Enviar comentarios</string>
+    <string name="set_as_default_color">¿Establecer como color por defecto\?</string>
+    <string name="set_as_default_color_message">Establecer este color como defecto para nuevas notas</string>
     <string name="settings">Ajustes</string>
     <string name="share">Compartir</string>
     <string name="single_file">Un fichero</string>
@@ -308,12 +342,15 @@
     <string name="start_view_hint">Seleccione qué vista o etiqueta se debe mostrar cuando se inicia la aplicación.\nLa opción predeterminada es la vista de notas principal</string>
     <string name="stop">Detener</string>
     <string name="strikethrough">Tachado</string>
+    <string name="super_dark">Super oscuro</string>
+    <string name="swap_action">Cambiar acción</string>
     <string name="take_note">Tomar nota</string>
     <string name="tap_for_more_options">Tocar para más opciones</string>
     <string name="tap_to_set_up">Toque para configurar</string>
     <string name="text_default">Por defecto</string>
     <string name="text_size_note_editor">Tamaño de texto (editor de notas)</string>
     <string name="text_size_overview">Tamaño de texto (descripción general)</string>
+    <string name="text_size_preview">Lorem ipsum dolor sit</string>
     <string name="theme">Tema</string>
     <string name="theme_use_dynamic_colors">Usar color de fondo del sistema</string>
     <string name="title">Título</string>

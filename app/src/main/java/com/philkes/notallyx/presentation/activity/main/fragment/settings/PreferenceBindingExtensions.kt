@@ -1,13 +1,19 @@
 package com.philkes.notallyx.presentation.activity.main.fragment.settings
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.hardware.biometrics.BiometricManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.text.method.PasswordTransformationMethod
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.documentfile.provider.DocumentFile
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -15,6 +21,7 @@ import com.google.android.material.slider.Slider
 import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
 import com.philkes.notallyx.R
 import com.philkes.notallyx.databinding.ChoiceItemBinding
+import com.philkes.notallyx.databinding.DialogDatetimeFormatBinding
 import com.philkes.notallyx.databinding.DialogNotesSortBinding
 import com.philkes.notallyx.databinding.DialogPreferenceBooleanBinding
 import com.philkes.notallyx.databinding.DialogPreferenceEnumWithToggleBinding
@@ -22,11 +29,14 @@ import com.philkes.notallyx.databinding.DialogSelectionBoxBinding
 import com.philkes.notallyx.databinding.DialogTextInputBinding
 import com.philkes.notallyx.databinding.PreferenceBinding
 import com.philkes.notallyx.databinding.PreferenceSeekbarBinding
+import com.philkes.notallyx.databinding.PreferenceStepperBinding
 import com.philkes.notallyx.presentation.checkedTag
+import com.philkes.notallyx.presentation.hideKeyboard
 import com.philkes.notallyx.presentation.select
 import com.philkes.notallyx.presentation.setCancelButton
 import com.philkes.notallyx.presentation.setTextSizeSp
 import com.philkes.notallyx.presentation.showAndFocus
+import com.philkes.notallyx.presentation.showKeyboard
 import com.philkes.notallyx.presentation.showToast
 import com.philkes.notallyx.presentation.view.misc.MenuDialog
 import com.philkes.notallyx.presentation.viewmodel.BaseNoteModel
@@ -47,6 +57,7 @@ import com.philkes.notallyx.presentation.viewmodel.preference.SortDirection
 import com.philkes.notallyx.presentation.viewmodel.preference.StringPreference
 import com.philkes.notallyx.presentation.viewmodel.preference.TextProvider
 import com.philkes.notallyx.presentation.viewmodel.preference.Theme
+import com.philkes.notallyx.presentation.viewmodel.preference.TimeFormat
 import com.philkes.notallyx.utils.canAuthenticateWithBiometrics
 import com.philkes.notallyx.utils.toReadablePath
 
@@ -185,55 +196,6 @@ fun PreferenceBinding.setup(
                     model.preferences.notesSorting,
                     NotesSort(newSortBy, newSortDirection),
                 )
-            }
-            .setCancelButton()
-            .show()
-    }
-}
-
-fun PreferenceBinding.setup(
-    dateFormatPreference: EnumPreference<DateFormat>,
-    dateFormatValue: DateFormat,
-    applyToNoteViewValue: Boolean,
-    context: Context,
-    layoutInflater: LayoutInflater,
-    onSave: (dateFormat: DateFormat, applyToEditMode: Boolean) -> Unit,
-) {
-    Title.setText(dateFormatPreference.titleResId!!)
-
-    Value.text = dateFormatValue.getText(context)
-
-    root.setOnClickListener {
-        val layout = DialogPreferenceEnumWithToggleBinding.inflate(layoutInflater, null, false)
-        layout.EnumHint.apply {
-            setText(R.string.date_format_hint)
-            isVisible = true
-        }
-        DateFormat.entries.forEachIndexed { idx, dateFormat ->
-            ChoiceItemBinding.inflate(layoutInflater).root.apply {
-                id = idx
-                text = dateFormat.getText(context)
-                tag = dateFormat
-                layout.EnumRadioGroup.addView(this)
-                if (dateFormat == dateFormatValue) {
-                    layout.EnumRadioGroup.check(this.id)
-                }
-            }
-        }
-
-        layout.Toggle.apply {
-            setText(R.string.date_format_apply_in_note_view)
-            isChecked = applyToNoteViewValue
-        }
-
-        MaterialAlertDialogBuilder(context)
-            .setTitle(dateFormatPreference.titleResId)
-            .setView(layout.root)
-            .setPositiveButton(R.string.save) { dialog, _ ->
-                dialog.cancel()
-                val dateFormat = layout.EnumRadioGroup.checkedTag() as DateFormat
-                val applyToNoteView = layout.Toggle.isChecked
-                onSave(dateFormat, applyToNoteView)
             }
             .setCancelButton()
             .show()
@@ -548,43 +510,157 @@ fun PreferenceSeekbarBinding.setupTextSizePreference(
     }
 }
 
-fun PreferenceSeekbarBinding.setupAutoSaveIdleTime(
-    preference: IntPreference,
+@SuppressLint("ClickableViewAccessibility")
+fun PreferenceStepperBinding.setup(
+    value: Int,
+    titleResId: Int,
+    min: Int,
+    max: Int,
     context: Context,
-    value: Int = preference.value,
+    enabled: Boolean = true,
+    labelFormatter: ((Int) -> String)? = null,
     onChange: (newValue: Int) -> Unit,
 ) {
-    Slider.apply {
-        setLabelFormatter { sliderValue ->
-            if (sliderValue == -1f) {
-                context.getString(R.string.disabled)
-            } else "${sliderValue.toInt()}s"
+    val initialValue = value.coerceIn(min, max)
+    Title.setText(titleResId)
+    ValueInput.setText(labelFormatter?.invoke(initialValue) ?: initialValue.toString())
+    ValueInput.isEnabled = enabled
+
+    fun updateButtons(value: Int) {
+        MinusButton.isEnabled = enabled && value > min
+        PlusButton.isEnabled = enabled && value < max
+    }
+
+    updateButtons(initialValue)
+
+    val handler = Handler(Looper.getMainLooper())
+    fun updateValue(increment: Int, commit: Boolean): Boolean {
+        val newValue = (ValueInput.tag as? Int ?: initialValue) + increment
+        val valid = newValue in min..max
+        if (valid) {
+            ValueInput.tag = newValue
+            ValueInput.setText(labelFormatter?.invoke(newValue) ?: newValue.toString())
+            updateButtons(newValue)
+            if (commit) {
+                onChange(newValue)
+            }
         }
-        addOnChangeListener { _, value, _ ->
-            if (value == -1f) {
-                setAlpha(0.6f) // Reduce opacity to make it look disabled
+        ValueInput.clearFocus()
+        return valid
+    }
+
+    fun stepperRunnable(isIncrement: Boolean) =
+        object : Runnable {
+            override fun run() {
+                if (updateValue(if (isIncrement) 1 else -1, false)) {
+                    handler.postDelayed(this, 100)
+                }
+            }
+        }
+    var runnable: Runnable? = null
+    val startAutoIncrement = { isIncrement: Boolean ->
+        runnable?.let { handler.removeCallbacks(it) }
+        runnable =
+            if (isIncrement) stepperRunnable(isIncrement = true)
+            else stepperRunnable(isIncrement = false)
+        handler.postDelayed(runnable!!, 100)
+    }
+
+    MinusButton.apply {
+        setOnClickListener { updateValue(-1, true) }
+        setOnLongClickListener {
+            startAutoIncrement(false)
+            true
+        }
+        setOnTouchListener { _, event ->
+            if (
+                runnable != null &&
+                    (event.action == MotionEvent.ACTION_UP ||
+                        event.action == MotionEvent.ACTION_CANCEL)
+            ) {
+                handler.removeCallbacks(runnable!!)
+                onChange(ValueInput.tag as? Int ?: value)
+            }
+            false
+        }
+    }
+
+    PlusButton.apply {
+        setOnClickListener { updateValue(1, true) }
+        setOnLongClickListener {
+            startAutoIncrement(true)
+            true
+        }
+        setOnTouchListener { _, event ->
+            if (
+                runnable != null &&
+                    (event.action == MotionEvent.ACTION_UP ||
+                        event.action == MotionEvent.ACTION_CANCEL)
+            ) {
+                handler.removeCallbacks(runnable!!)
+                onChange(ValueInput.tag as? Int ?: value)
+            }
+            false
+        }
+    }
+
+    ValueInput.apply {
+        tag = value
+        doAfterTextChanged { text ->
+            if (ValueInput.hasFocus()) {
+                val newValue = text.toString().toIntOrNull()
+                if (newValue != null) {
+                    val clampedValue = newValue.coerceIn(min, max)
+                    if (clampedValue != ValueInput.tag) {
+                        ValueInput.tag = clampedValue
+                        updateButtons(clampedValue)
+                    }
+                }
+            }
+        }
+        setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                val currentValue = ValueInput.tag as? Int ?: initialValue
+                val text = currentValue.toString()
+                ValueInput.setText(text)
+                ValueInput.setSelection(text.length)
+                context.showKeyboard(ValueInput)
             } else {
-                setAlpha(1f) // Restore normal appearance
+                val currentValue = ValueInput.tag as? Int ?: initialValue
+                ValueInput.setText(labelFormatter?.invoke(currentValue) ?: currentValue.toString())
+                updateButtons(currentValue)
+                onChange(currentValue)
+            }
+        }
+        setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                context.hideKeyboard(ValueInput)
+                v.clearFocus() // This triggers the OnFocusChangeListener logic
+                true
+            } else {
+                false
             }
         }
     }
-    setup(preference, context, value, onChange = onChange)
 }
 
-fun PreferenceSeekbarBinding.setupAutoEmptyBin(
+fun PreferenceStepperBinding.setup(
     preference: IntPreference,
     context: Context,
     value: Int = preference.value,
+    labelFormatter: ((Int) -> String)? = null,
     onChange: (newValue: Int) -> Unit,
 ) {
-    Slider.apply {
-        setLabelFormatter { sliderValue ->
-            if (sliderValue == 0f) {
-                context.getString(R.string.disabled)
-            } else "${sliderValue.toInt()} ${context.getString(R.string.days)}"
-        }
+    setup(
+        value,
+        preference.titleResId!!,
+        preference.min,
+        preference.max,
+        context,
+        labelFormatter = labelFormatter,
+    ) { newValue ->
+        onChange(newValue)
     }
-    setup(preference, context, value, R.string.auto_remove_deleted_notes_hint, onChange)
 }
 
 fun PreferenceBinding.setupStartView(
@@ -629,6 +705,70 @@ fun PreferenceBinding.setupStartView(
                     val newValue = values[selected].second
                     onSave(newValue)
                 }
+            }
+            .setCancelButton()
+            .showAndFocus(allowFullSize = true)
+    }
+}
+
+fun PreferenceBinding.setupDateTimeFormat(
+    titleResId: Int,
+    datePreference: EnumPreference<DateFormat>,
+    timePreference: EnumPreference<TimeFormat>,
+    context: Context,
+    layoutInflater: LayoutInflater,
+    onSave: (dateFormat: DateFormat, timeFormat: TimeFormat) -> Unit,
+) {
+    Title.setText(titleResId)
+    val updateValueText = {
+        val dateText =
+            if (datePreference.value == DateFormat.NONE) ""
+            else datePreference.value.getText(context)
+        val timeText =
+            if (timePreference.value == TimeFormat.NONE) ""
+            else timePreference.value.getText(context)
+        Value.text =
+            when {
+                datePreference.value == DateFormat.NONE &&
+                    timePreference.value == TimeFormat.NONE ->
+                    datePreference.value.getText(context) // Shows "None"
+                datePreference.value == DateFormat.NONE -> timeText
+                timePreference.value == TimeFormat.NONE -> dateText
+                else -> "$dateText $timeText"
+            }
+    }
+    updateValueText()
+
+    root.setOnClickListener {
+        val layout = DialogDatetimeFormatBinding.inflate(layoutInflater, null, false)
+        var selectedDate = datePreference.value
+        var selectedTime = timePreference.value
+
+        val dateEntries = DateFormat.entries.map { it.getText(context) }.toTypedArray()
+        layout.DateSelectionBox.apply {
+            setSimpleItems(dateEntries)
+            select(selectedDate.getText(context))
+            setOnItemClickListener { _, _, position, _ ->
+                selectedDate = DateFormat.entries[position]
+            }
+        }
+
+        val timeEntries = TimeFormat.entries.map { it.getText(context) }.toTypedArray()
+        layout.TimeSelectionBox.apply {
+            setSimpleItems(timeEntries)
+            select(selectedTime.getText(context))
+            setOnItemClickListener { _, _, position, _ ->
+                selectedTime = TimeFormat.entries[position]
+            }
+        }
+
+        MaterialAlertDialogBuilder(context)
+            .setTitle(titleResId)
+            .setView(layout.root)
+            .setPositiveButton(R.string.save) { dialog, _ ->
+                dialog.cancel()
+                onSave(selectedDate, selectedTime)
+                updateValueText()
             }
             .setCancelButton()
             .showAndFocus(allowFullSize = true)

@@ -85,9 +85,11 @@
     <string name="data_in_public_message">Attivandolo, il database interno dell’app e i file allegati verranno spostati nella cartella pubblica dell’app (Android/media/com.philkes.notallyx). Abbinandolo con un’app di sincronizzazione file potrai così sincronizzare i dati di NotallyX tra dispositivi diversi.</string>
     <string name="date">Data</string>
     <string name="date_format">Formato data</string>
-    <string name="date_format_apply_in_note_view">Applica anche nella vista nota</string>
     <string name="date_format_hint">Applica il formato data selezionato nella panoramica delle note</string>
-    <string name="days">Giorni</string>
+    <plurals name="days">
+        <item quantity="one">Giorno</item>
+        <item quantity="other">Giorni</item>
+    </plurals>
     <string name="delete">Elimina</string>
     <string name="delete_all">Elimina tutto</string>
     <string name="delete_all_notes">Eliminare tutte le note\?</string>
@@ -99,7 +101,7 @@
     <string name="delete_image_forever">Eliminare l’immagine definitivamente\?</string>
     <string name="delete_label">Eliminare etichetta\?</string>
     <string name="delete_note_forever">Eliminare nota definitivamente\?</string>
-    <string name="delete_reminder">Eliminare promemoria\?</string>
+    <string name="delete_reminder_question">Eliminare promemoria\?</string>
     <string name="delete_selected_notes">Eliminare le note selezionate\?</string>
     <string name="deleted">Cestino</string>
     <plurals name="deleted_selected_notes">
